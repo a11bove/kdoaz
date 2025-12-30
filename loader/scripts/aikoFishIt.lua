@@ -1688,14 +1688,25 @@ local function getAvailableEvents()
     
     if frame then
         for _, child in ipairs(frame:GetChildren()) do
-            local displayName = child:IsA("Frame") and 
-                              child:FindFirstChild("DisplayName") and 
-                              child.DisplayName.Text or child.Name
+            local displayName = nil
+            
+            if child:IsA("Frame") then
+                local displayLabel = child:FindFirstChild("DisplayName")
+                if displayLabel and displayLabel:IsA("TextLabel") then
+                    displayName = displayLabel.Text
+                end
+            end
+            
+            if not displayName or displayName == "" then
+                displayName = child.Name
+            end
             
             if typeof(displayName) == "string" and 
                displayName ~= "" and 
+               displayName ~= "UIListLayout" and
                not IgnoredEvents[displayName] then
-                table.insert(events, displayName:gsub("^Admin %- ", ""))
+                local cleanName = displayName:gsub("^Admin %- ", "")
+                table.insert(events, cleanName)
             end
         end
     end
@@ -1733,21 +1744,23 @@ local function findEventLocation(eventName)
         end
         
         for _, propsFolder in ipairs(propsLocations) do
-            for _, model in ipairs(propsFolder:GetChildren()) do
-                for _, descendant in ipairs(model:GetDescendants()) do
-                    if descendant:IsA("TextLabel") and 
-                       descendant.Name == "DisplayName" then
-                        local text = (descendant.ContentText ~= "" and 
-                                    descendant.ContentText) or descendant.Text
-                        
-                        if text:lower() == eventName:lower() then
-                            local parentModel = descendant:FindFirstAncestorOfClass("Model")
-                            local part = parentModel and 
-                                       parentModel:FindFirstChild("Part") or 
-                                       model:FindFirstChild("Part")
+            if propsFolder then
+                for _, model in ipairs(propsFolder:GetChildren()) do
+                    for _, descendant in ipairs(model:GetDescendants()) do
+                        if descendant:IsA("TextLabel") and 
+                           descendant.Name == "DisplayName" then
+                            local text = (descendant.ContentText ~= "" and 
+                                        descendant.ContentText) or descendant.Text
                             
-                            if part and part:IsA("BasePart") then
-                                return part
+                            if text:lower() == eventName:lower() then
+                                local parentModel = descendant:FindFirstAncestorOfClass("Model")
+                                local part = parentModel and 
+                                           parentModel:FindFirstChild("Part") or 
+                                           model:FindFirstChild("Part")
+                                
+                                if part and part:IsA("BasePart") then
+                                    return part
+                                end
                             end
                         end
                     end
