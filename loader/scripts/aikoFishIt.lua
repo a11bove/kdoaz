@@ -85,6 +85,13 @@ local lockPositionState = {
     position = nil
 }
 
+local State = {
+    selectedEvent = nil,
+    eventOffsets = {
+        ["Worm Hunt"] = 25
+    }
+}
+
 local playerAddedConnection
 local characterConnections = {}
 
@@ -320,42 +327,6 @@ fsh:AddToggle({
     end
 })
 
---[[fsh:AddToggle({
-    Title = "Legit Fishing",
-    Content = "",
-    Default = false,
-    Callback = function(enabled)
-        EquipToolFromHotbar:FireServer(1)
-        StartLegitFishing(enabled)
-        
-        local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-        local fishingGui = playerGui:WaitForChild("Fishing"):WaitForChild("Main")
-        local chargeGui = playerGui:WaitForChild("Charge"):WaitForChild("Main")
-        
-        if enabled then
-            fishingGui.Visible = false
-            chargeGui.Visible = false
-            
-            AIKO:MakeNotify({
-                Title = "@aikoware",
-                Description = "| Legit Fishing",
-                Content = "Enabled",
-                Delay = 2
-            })
-        else
-            fishingGui.Visible = true
-            chargeGui.Visible = true
-            
-            AIKO:MakeNotify({
-                Title = "@aikoware",
-                Description = "| Legit Fishing",
-                Content = "Disabled",
-                Delay = 2
-            })
-        end
-    end
-})]]
-
 fsh:AddButton({
     Title = "Manual Fix Stuck",
     Content = "",
@@ -471,41 +442,77 @@ fin:AddInput({
 
 local bts = Fishing:AddSection("Blatant")
 
-local SuperInstantV2Enabled = false
-local ScytheReelDelay = 1.05
-local ScytheCompleteDelay = 0.16
+_G.FishingDelay = _G.FishingDelay or 1.1
+_G.Reel = _G.Reel or 1.9
+_G.FBlatant = _G.FBlatant or false
 
-local function SuperInstantV2Cycle()
+function FastestFishing()
     task.spawn(function()
-        CancelFishingInputs:InvokeServer()
-        task.wait(ScytheReelDelay)
-        ChargeFishingRod:InvokeServer(1756863567.217075)
-        RequestFishingMinigame:InvokeServer(-139.63796997070312, 0.9964792798079721)
-        task.wait(ScytheCompleteDelay)
-        FishingCompleted:FireServer()
+        pcall(function()
+            CancelFishingInputs:InvokeServer()
+        end)
+
+        local serverTime = workspace:GetServerTimeNow()
+
+        pcall(function()
+            ChargeFishingRod:InvokeServer(serverTime)
+        end)
+
+        pcall(function()
+            RequestFishingMinigame:InvokeServer(-1, 0.999)
+        end)
+
+        task.wait(_G.FishingDelay)
+
+        pcall(function()
+            FishingCompleted:FireServer()
+        end)
     end)
 end
 
-_G.ReelSuper = 1.05
+function StartBlatantFishing()
+    _G.FBlatant = true
+    EquipToolFromHotbar:FireServer(1)
 
-local function StartSuperInstantV2()
-    if not SuperInstantV2Enabled then
-        SuperInstantV2Enabled = true
-        EquipFishingRod()
-        task.spawn(function()
-            while SuperInstantV2Enabled do
-                local startTime = tick()
-                SuperInstantV2Cycle()
-                while SuperInstantV2Enabled and tick() - startTime < _G.ReelSuper do
-                    task.wait()
-                end
-            end
+    LocalPlayer:SetAttribute("Loading", nil)
+
+    task.spawn(function()
+        while _G.FBlatant do
+            FastestFishing()
+            task.wait(_G.Reel)
+        end
+    end)
+end
+
+function StopBlatantFishing()
+    _G.FBlatant = false
+    LocalPlayer:SetAttribute("Loading", false)
+end
+
+function RecoveryFishing()
+    task.spawn(function()
+        pcall(function()
+            CancelFishingInputs:InvokeServer()
         end)
+
+        LocalPlayer:SetAttribute("Loading", nil)
+        task.wait(0.05)
+        LocalPlayer:SetAttribute("Loading", false)
+    end)
+end
+
+function SetFishingDelay(delay)
+    local num = tonumber(delay)
+    if num and num > 0 then
+        _G.FishingDelay = num
     end
 end
 
-local function StopSuperInstantV2()
-    SuperInstantV2Enabled = false
+function SetReelDelay(delay)
+    local num = tonumber(delay)
+    if num and num > 0 then
+        _G.Reel = num
+    end
 end
 
 bts:AddToggle({
@@ -514,38 +521,33 @@ bts:AddToggle({
     Default = false,
     Callback = function(enabled)
         if enabled then
-            StartSuperInstantV2()
+            StartBlatantFishing()
         else
-            StopSuperInstantV2()
+            StopBlatantFishing()
         end
     end
 })
 
-local ScytheCompleteDelayInput = bts:AddInput({
-    Title = "Complete Delay",
-    Content = "Enter delay in seconds",
-    Placeholder = "0.16",
+bts:AddInput({
+    Title = "Fishing Delay",
+    Placeholder = "1.1",
     Callback = function(value)
-        local delay = tonumber(value)
-        if delay and delay > 0 then
-            ScytheCompleteDelay = delay
-        elseif ScytheCompleteDelayInput then
-            ScytheCompleteDelayInput:Set(tostring(ScytheCompleteDelay))
-        end
+        SetFishingDelay(value)
     end
 })
 
-local ScytheReelDelayInput = bts:AddInput({
-    Title = "Cancel Delay",
-    Content = "Enter delay in seconds",
-    Placeholder = "1.05",
+bts:AddInput({
+    Title = "Reel Delay",
+    Placeholder = "1.9",
     Callback = function(value)
-        local delay = tonumber(value)
-        if delay and delay > 0 then
-            ScytheReelDelay = delay
-        elseif ScytheReelDelayInput then
-            ScytheReelDelayInput:Set(tostring(ScytheReelDelay))
-        end
+        SetReelDelay(value)
+    end
+})
+
+bts:AddButton({
+    Title = "Manual Fix Stuck",
+    Callback = function()
+        RecoveryFishing()
     end
 })
 
@@ -1610,176 +1612,151 @@ mach:AddButton({
 
 local evt = Teleport:AddSection("Event")
 
-local eventMap = {
-    ["Shark Hunt"]         = { name = "Shark Hunt", part = "Color" },
-    ["Ghost Shark Hunt"]   = { name = "Ghost Shark Hunt", part = "Part" },
-    ["Worm Hunt"]          = { name = "Model", part = "Part" },
-    ["Black Hole"]         = { name = "BlackHole", part = nil },
-    ["Meteor Rain"]        = { name = "MeteorRain", part = nil },
-    ["Ghost Worm"]         = { name = "Model", part = "Part" },
-    ["Shocked"]            = { name = "Shocked", part = nil },
-    ["Megalodon Hunt"]     = { name = "Megalodon Hunt", part = "Color" },
-}
+function FindEventPart(eventName)
+    if not eventName then return nil end
 
-local eventNames = {}
-for _, data in pairs(eventMap) do
-    if data.name ~= "Model" then
-        table.insert(eventNames, data.name)
-    end
-end
-table.insert(eventNames, "Worm Hunt") 
-table.insert(eventNames, "Ghost Worm")
-
-local selectedEvent = nil
-local eventPlatform = nil
-
-local function createEventPlatform(position)
-    if eventPlatform then
-        eventPlatform:Destroy()
-    end
-
-    eventPlatform = Instance.new("Part")
-    eventPlatform.Size = Vector3.new(10, 1, 10)
-    eventPlatform.Position = position - Vector3.new(0, 5, 0)
-    eventPlatform.Anchored = true
-    eventPlatform.CanCollide = true
-    eventPlatform.Transparency = 0.3
-    eventPlatform.Color = Color3.fromRGB(75, 0, 130)
-    eventPlatform.Material = Enum.Material.ForceField
-    eventPlatform.Name = "EventPlatform"
-    eventPlatform.Parent = workspace
-end
-
-local function getPartRecursive(o)
-    if o:IsA("BasePart") then return o end
-    for _, c in ipairs(o:GetChildren()) do
-        local p = getPartRecursive(c)
-        if p then return p end
-    end
-    return nil
-end
-
-local function findEventModel(eventName)
-    local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
-    if not menuRings then return nil end
-
-    local props = menuRings:FindFirstChild("Props")
-    if not props then return nil end
-
-    local targetEventData = nil
-
-    for uiName, data in pairs(eventMap) do
-        if uiName == eventName then
-            targetEventData = data
-            break
+    if eventName == "Megalodon Hunt" then
+        local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
+        if menuRings then
+            for _, child in ipairs(menuRings:GetChildren()) do
+                local megalodon = child:FindFirstChild("Megalodon Hunt")
+                if megalodon then
+                    megalodon = megalodon:FindFirstChild("Megalodon Hunt")
+                end
+                if megalodon and megalodon:IsA("BasePart") then
+                    return megalodon
+                end
+            end
         end
-    end
+    else
+        local propsFolders = {workspace:FindFirstChild("Props")}
+        local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
 
-    if not targetEventData then return nil end
-
-    local eventModel = props:FindFirstChild(targetEventData.name) 
-
-    if eventModel and eventModel:IsA("Model") then
-        local targetPart = nil
-
-        if eventName == "Megalodon Hunt" then
-            targetPart = eventModel:FindFirstChild("Color")
-        elseif eventName == "Ghost Shark Hunt" then
-            targetPart = eventModel:FindFirstChild("Part")
-        elseif eventName == "Worm Hunt" or eventName == "Ghost Worm" then
-            targetPart = eventModel:FindFirstChild("Part")
-        elseif eventName == "Shark Hunt" then
-            targetPart = eventModel:FindFirstChild("Color")
-        elseif targetEventData.part then
-            targetPart = eventModel:FindFirstChild(targetEventData.part)
+        if menuRings then
+            for _, child in ipairs(menuRings:GetChildren()) do
+                if child.Name:match("^Props") then
+                    table.insert(propsFolders, child)
+                end
+            end
         end
 
-        if targetPart and targetPart:IsA("BasePart") then
-            return targetPart
-        elseif eventModel.PrimaryPart and eventModel.PrimaryPart:IsA("BasePart") then
-            return eventModel.PrimaryPart
-        else 
-            return getPartRecursive(eventModel)
+        for _, propsFolder in ipairs(propsFolders) do
+            if propsFolder then
+                for _, model in ipairs(propsFolder:GetChildren()) do
+                    for _, descendant in ipairs(model:GetDescendants()) do
+                        if descendant:IsA("TextLabel") and descendant.Name == "DisplayName" then
+                            local text = descendant.ContentText ~= "" and descendant.ContentText or descendant.Text
+                            if text:lower() == eventName:lower() then
+                                local parentModel = descendant:FindFirstAncestorOfClass("Model")
+                                local part = parentModel and parentModel:FindFirstChild("Part") or model:FindFirstChild("Part")
+                                if part and part:IsA("BasePart") then
+                                    return part
+                                end
+                            end
+                        end
+                    end
+                end
+            end
         end
     end
 
     return nil
 end
+
+function TeleportToEvent(eventName)
+    if not eventName then
+        return false
+    end
+
+    local eventPart = FindEventPart(eventName)
+    if not eventPart then
+        return false
+    end
+
+    local hrp = Character:FindFirstChild("HumanoidRootPart")
+    if hrp then
+        local offset = State.eventOffsets[eventName] or 7
+        hrp.CFrame = eventPart.CFrame + Vector3.new(0, offset, 0)
+        return true
+    end
+
+    return false
+end
+
+function GetActiveEvents()
+    local events = {}
+    local eventsGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("Events")
+    local eventsFrame = eventsGui and eventsGui:FindFirstChild("Frame")
+
+    if eventsFrame then
+        eventsFrame = eventsFrame:FindFirstChild("Events")
+    end
+
+    if eventsFrame then
+        for _, child in ipairs(eventsFrame:GetChildren()) do
+            local displayName = child:IsA("Frame") and child:FindFirstChild("DisplayName") 
+                and child.DisplayName.Text or child.Name
+
+            if typeof(displayName) == "string" and displayName ~= "" then
+                local cleanName = displayName:gsub("^Admin %- ", "")
+
+                local ignoreList = {
+                    Cloudy = true,
+                    Day = true,
+                    ["Increased Luck"] = true,
+                    Mutated = true,
+                    Night = true,
+                    Snow = true,
+                    ["Sparkling Cove"] = true,
+                    Storm = true,
+                    Wind = true,
+                    UIListLayout = true,
+                    ["Admin - Shocked"] = true,
+                    ["Admin - Super Mutated"] = true,
+                    Radiant = true
+                }
+
+                if not ignoreList[cleanName] then
+                    table.insert(events, cleanName)
+                end
+            end
+        end
+    end
+
+    return events
+end
+
+local activeEvents = GetActiveEvents()
 
 local chooseEvent = evt:AddDropdown({
     Title = "Select Event",
-    Content = "Choose event to teleport",
-    Options = {"Shark Hunt", "Ghost Shark Hunt", "Megalodon Hunt", "Black Hole", "Meteor Rain", "Worm Hunt", "Ghost Worm", "Shocked"},
+    Options = activeEvents,
     Multi = false,
     Default = {},
     Callback = function(selected)
         if type(selected) == "table" and #selected > 0 then
-            selectedEvent = selected[1]
+            State.selectedEvent = selected[1]
         elseif type(selected) == "string" then
-            selectedEvent = selected
+            State.selectedEvent = selected
         else
-            selectedEvent = nil
-        end
-
-        if selectedEvent then
-                AIKO:MakeNotify({
-                Title = "@aikoware",
-                Description = "| Event Selected",
-                Content = selectedEvent,
-                Delay = 3
-            })
+            State.selectedEvent = nil
         end
     end
 })
 
 evt:AddButton({
-    Title = "Teleport to Event",
-    Content = "Teleport to selected event.",
+    Title = "Refresh Event List",
     Callback = function()
-        if not selectedEvent then
-                AIKO:MakeNotify({
-                Title = "@aikoware",
-                Description = "| Error",
-                Content = "Select an event first!",
-                Delay = 3
-            })
-            return
-        end
+        local events = GetActiveEvents()
+        chooseEvent:Refresh(events)
+    end
+})
 
-        local eventModel = findEventModel(selectedEvent)
-
-        if eventModel then
-            local char = workspace:FindFirstChild("Characters"):FindFirstChild(LocalPlayer.Name)
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
-            if hrp then
-                local targetPos
-                if eventModel:IsA("BasePart") then
-                    targetPos = eventModel.Position
-                elseif eventModel:IsA("Model") then
-                    targetPos = eventModel:GetPivot().Position
-                end
-
-                if targetPos then
-                    hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, 20, 0))
-
-                    createEventPlatform(hrp.Position)
-
-                        AIKO:MakeNotify({
-                        Title = "@aikoware",
-                        Description = "| Teleported",
-                        Content = "Teleported to " .. selectedEvent,
-                        Delay = 3
-                    })
-                end
-            end
-        else
-                AIKO:MakeNotify({
-                Title = "@aikoware",
-                Description = "| Error",
-                Content = "Event not found or not active",
-                Delay = 3
-            })
+evt:AddButton({
+    Title = "Teleport to Event",
+    Callback = function()
+        if State.selectedEvent then
+            TeleportToEvent(State.selectedEvent)
         end
     end
 })
