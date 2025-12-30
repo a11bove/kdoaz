@@ -733,7 +733,7 @@ function AIKO:Window(GuiConfig)
     LayersPageLayout.SortOrder = Enum.SortOrder.LayoutOrder
     LayersPageLayout.Name = "LayersPageLayout"
     LayersPageLayout.Parent = LayersFolder
-    LayersPageLayout.TweenTime = 0.1
+    LayersPageLayout.TweenTime = 0.15
     LayersPageLayout.EasingDirection = Enum.EasingDirection.InOut
     LayersPageLayout.EasingStyle = Enum.EasingStyle.Quad
 
@@ -1238,19 +1238,19 @@ end
                     if TabFrame.Name == "Tab" then
                         TweenService:Create(
                             TabFrame,
-                            TweenInfo.new(0.1, Enum.EasingStyle.Back, Enum.EasingDirection.InOut),
+                            TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.InOut),
                             { BackgroundTransparency = 0.9990000128746033 }
                         ):Play()
                     end
                 end
                 TweenService:Create(
                     Tab,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Back, Enum.EasingDirection.InOut),
+                    TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.InOut),
                     { BackgroundTransparency = 0.9200000166893005 }
                 ):Play()
                 TweenService:Create(
                     FrameChoose,
-                    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                     { Position = UDim2.new(0, 2, 0, 9 + (33 * Tab.LayoutOrder)) }
                 ):Play()
                 LayersPageLayout:JumpToIndex(Tab.LayoutOrder)
@@ -1258,13 +1258,13 @@ end
                 NameTab.Text = TabConfig.Name
                 TweenService:Create(
                     FrameChoose,
-                    TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                     { Size = UDim2.new(0, 1, 0, 20) }
                 ):Play()
                 task.wait(0.1)
                 TweenService:Create(
                     FrameChoose,
-                    TweenInfo.new(0.07, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+                    TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
                     { Size = UDim2.new(0, 1, 0, 12) }
                 ):Play()
             end
