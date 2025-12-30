@@ -85,13 +85,6 @@ local lockPositionState = {
     position = nil
 }
 
-local State = {
-    selectedEvent = nil,
-    eventOffsets = {
-        ["Worm Hunt"] = 25
-    }
-}
-
 local playerAddedConnection
 local characterConnections = {}
 
@@ -1610,48 +1603,151 @@ mach:AddButton({
     end
 })
 
-local evt = Teleport:AddSection("Event")
+local EventSettings = {
+    autoEventActive = false,
+    selectedEvents = {},
+    priorityEvent = nil,
+    currentCFrame = nil,
+    originalCFrame = nil,
+    floatingEnabled = false,
+    floatingConnection = nil,
+    lastState = nil,
+    offsets = {
+        ["Worm Hunt"] = 25
+    }
+}
 
-function FindEventPart(eventName)
+local IgnoredEvents = {
+    Cloudy = true,
+    Day = true,
+    ["Increased Luck"] = true,
+    Mutated = true,
+    Night = true,
+    Snow = true,
+    ["Sparkling Cove"] = true,
+    Storm = true,
+    Wind = true,
+    UIListLayout = true,
+    ["Admin - Shocked"] = true,
+    ["Admin - Super Mutated"] = true,
+    Radiant = true
+}
+
+local function getCharacterRoot(character)
+    if character then
+        return character:FindFirstChild("HumanoidRootPart") or 
+               character:FindFirstChildWhichIsA("BasePart")
+    end
+    return nil
+end
+
+local function setupWaterWalking(character, rootPart, enabled)
+    if EventSettings.floatingEnabled and EventSettings.floatingConnection then
+        EventSettings.floatingConnection:Disconnect()
+    end
+    
+    EventSettings.floatingEnabled = enabled or false
+    
+    if enabled then
+        local waterPart = Workspace:FindFirstChild("WW_Part") or Instance.new("Part")
+        waterPart.Name = "WW_Part"
+        waterPart.Size = Vector3.new(15, 1, 15)
+        waterPart.Anchored = true
+        waterPart.CanCollide = false
+        waterPart.Transparency = 1
+        waterPart.Material = Enum.Material.SmoothPlastic
+        waterPart.Parent = Workspace
+        
+        local waterLevel = -1.8
+        
+        EventSettings.floatingConnection = RunService.Heartbeat:Connect(function()
+            if character and rootPart and waterPart then
+                waterPart.Position = Vector3.new(rootPart.Position.X, waterLevel, rootPart.Position.Z)
+                waterPart.CanCollide = waterLevel < rootPart.Position.Y
+            end
+        end)
+    else
+        local existingPart = Workspace:FindFirstChild("WW_Part")
+        if existingPart then
+            existingPart:Destroy()
+        end
+    end
+end
+
+local function getAvailableEvents()
+    local events = {}
+    local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+    local eventsGui = playerGui:FindFirstChild("Events")
+    
+    if not eventsGui then return events end
+    
+    local frame = eventsGui:FindFirstChild("Frame")
+    if frame then
+        frame = frame:FindFirstChild("Events")
+    end
+    
+    if frame then
+        for _, child in ipairs(frame:GetChildren()) do
+            local displayName = child:IsA("Frame") and 
+                              child:FindFirstChild("DisplayName") and 
+                              child.DisplayName.Text or child.Name
+            
+            if typeof(displayName) == "string" and 
+               displayName ~= "" and 
+               not IgnoredEvents[displayName] then
+                table.insert(events, displayName:gsub("^Admin %- ", ""))
+            end
+        end
+    end
+    
+    return events
+end
+
+local function findEventLocation(eventName)
     if not eventName then return nil end
-
+    
     if eventName == "Megalodon Hunt" then
-        local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
+        local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
         if menuRings then
-            for _, child in ipairs(menuRings:GetChildren()) do
-                local megalodon = child:FindFirstChild("Megalodon Hunt")
-                if megalodon then
-                    megalodon = megalodon:FindFirstChild("Megalodon Hunt")
+            for _, ring in ipairs(menuRings:GetChildren()) do
+                local megalodonEvent = ring:FindFirstChild("Megalodon Hunt")
+                if megalodonEvent then
+                    megalodonEvent = megalodonEvent:FindFirstChild("Megalodon Hunt")
                 end
-                if megalodon and megalodon:IsA("BasePart") then
-                    return megalodon
+                
+                if megalodonEvent and megalodonEvent:IsA("BasePart") then
+                    return megalodonEvent
                 end
             end
         end
     else
-        local propsFolders = {workspace:FindFirstChild("Props")}
-        local menuRings = workspace:FindFirstChild("!!! MENU RINGS")
-
+        local propsLocations = {Workspace:FindFirstChild("Props")}
+        local menuRings = Workspace:FindFirstChild("!!! MENU RINGS")
+        
         if menuRings then
-            for _, child in ipairs(menuRings:GetChildren()) do
-                if child.Name:match("^Props") then
-                    table.insert(propsFolders, child)
+            for _, ring in ipairs(menuRings:GetChildren()) do
+                if ring.Name:match("^Props") then
+                    table.insert(propsLocations, ring)
                 end
             end
         end
-
-        for _, propsFolder in ipairs(propsFolders) do
-            if propsFolder then
-                for _, model in ipairs(propsFolder:GetChildren()) do
-                    for _, descendant in ipairs(model:GetDescendants()) do
-                        if descendant:IsA("TextLabel") and descendant.Name == "DisplayName" then
-                            local text = descendant.ContentText ~= "" and descendant.ContentText or descendant.Text
-                            if text:lower() == eventName:lower() then
-                                local parentModel = descendant:FindFirstAncestorOfClass("Model")
-                                local part = parentModel and parentModel:FindFirstChild("Part") or model:FindFirstChild("Part")
-                                if part and part:IsA("BasePart") then
-                                    return part
-                                end
+        
+        for _, propsFolder in ipairs(propsLocations) do
+            for _, model in ipairs(propsFolder:GetChildren()) do
+                for _, descendant in ipairs(model:GetDescendants()) do
+                    if descendant:IsA("TextLabel") and 
+                       descendant.Name == "DisplayName" then
+                        local text = (descendant.ContentText ~= "" and 
+                                    descendant.ContentText) or descendant.Text
+                        
+                        if text:lower() == eventName:lower() then
+                            local parentModel = descendant:FindFirstAncestorOfClass("Model")
+                            local part = parentModel and 
+                                       parentModel:FindFirstChild("Part") or 
+                                       model:FindFirstChild("Part")
+                            
+                            if part and part:IsA("BasePart") then
+                                return part
                             end
                         end
                     end
@@ -1659,87 +1755,132 @@ function FindEventPart(eventName)
             end
         end
     end
-
+    
     return nil
 end
 
-function TeleportToEvent(eventName)
-    if not eventName then
-        return false
+local function updateEventStatus(message)
+    if EventSettings.lastState ~= message then
+        AIKO:MakeNotify({
+            Title = "@aikoware",
+            Description = "| Auto Event",
+            Content = message,
+            Delay = 2
+        })
+        EventSettings.lastState = message
     end
-
-    local eventPart = FindEventPart(eventName)
-    if not eventPart then
-        return false
-    end
-
-    local hrp = Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local offset = State.eventOffsets[eventName] or 7
-        hrp.CFrame = eventPart.CFrame + Vector3.new(0, offset, 0)
-        return true
-    end
-
-    return false
 end
 
-function GetActiveEvents()
-    local events = {}
-    local eventsGui = LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("Events")
-    local eventsFrame = eventsGui and eventsGui:FindFirstChild("Frame")
-
-    if eventsFrame then
-        eventsFrame = eventsFrame:FindFirstChild("Events")
-    end
-
-    if eventsFrame then
-        for _, child in ipairs(eventsFrame:GetChildren()) do
-            local displayName = child:IsA("Frame") and child:FindFirstChild("DisplayName") 
-                and child.DisplayName.Text or child.Name
-
-            if typeof(displayName) == "string" and displayName ~= "" then
-                local cleanName = displayName:gsub("^Admin %- ", "")
-
-                local ignoreList = {
-                    Cloudy = true,
-                    Day = true,
-                    ["Increased Luck"] = true,
-                    Mutated = true,
-                    Night = true,
-                    Snow = true,
-                    ["Sparkling Cove"] = true,
-                    Storm = true,
-                    Wind = true,
-                    UIListLayout = true,
-                    ["Admin - Shocked"] = true,
-                    ["Admin - Super Mutated"] = true,
-                    Radiant = true
-                }
-
-                if not ignoreList[cleanName] then
-                    table.insert(events, cleanName)
+function EventSettings.loop()
+    while EventSettings.autoEventActive do
+        local targetEvent = nil
+        local targetLocation = nil
+        
+        if EventSettings.priorityEvent then
+            targetLocation = findEventLocation(EventSettings.priorityEvent)
+            if targetLocation then
+                targetEvent = EventSettings.priorityEvent
+            end
+        end
+        
+        if not targetLocation and #EventSettings.selectedEvents > 0 then
+            for _, eventName in ipairs(EventSettings.selectedEvents) do
+                targetLocation = findEventLocation(eventName)
+                if targetLocation then
+                    targetEvent = eventName
+                    break
                 end
             end
         end
+        
+        local rootPart = getCharacterRoot(LocalPlayer.Character)
+        
+        if targetLocation and rootPart then
+            if not EventSettings.originalCFrame then
+                EventSettings.originalCFrame = rootPart.CFrame
+            end
+            
+            if (rootPart.Position - targetLocation.Position).Magnitude > 40 then
+                local offset = EventSettings.offsets[targetEvent] or 7
+                EventSettings.currentCFrame = targetLocation.CFrame + Vector3.new(0, offset, 0)
+                LocalPlayer.Character:PivotTo(EventSettings.currentCFrame)
+                setupWaterWalking(LocalPlayer.Character, rootPart, true)
+                task.wait(1)
+                updateEventStatus("Event! " .. targetEvent)
+            end
+        elseif not targetLocation and EventSettings.currentCFrame and rootPart then
+            setupWaterWalking(LocalPlayer.Character, nil, false)
+            if EventSettings.originalCFrame then
+                LocalPlayer.Character:PivotTo(EventSettings.originalCFrame)
+                updateEventStatus("Event ended - Returned")
+                EventSettings.originalCFrame = nil
+            end
+            EventSettings.currentCFrame = nil
+        elseif not EventSettings.currentCFrame then
+            updateEventStatus("Waiting for event...")
+        end
+        
+        task.wait(0.2)
     end
-
-    return events
+    
+    setupWaterWalking(LocalPlayer.Character, nil, false)
+    if EventSettings.originalCFrame and LocalPlayer.Character then
+        LocalPlayer.Character:PivotTo(EventSettings.originalCFrame)
+        updateEventStatus("Auto Event disabled")
+    end
+    EventSettings.currentCFrame = nil
+    EventSettings.originalCFrame = nil
 end
 
-local activeEvents = GetActiveEvents()
+LocalPlayer.CharacterAdded:Connect(function(newCharacter)
+    if EventSettings.autoEventActive then
+        task.spawn(function()
+            local rootPart = newCharacter:WaitForChild("HumanoidRootPart", 5)
+            task.wait(0.3)
+            
+            if rootPart then
+                if EventSettings.currentCFrame then
+                    newCharacter:PivotTo(EventSettings.currentCFrame)
+                    setupWaterWalking(newCharacter, rootPart, true)
+                    task.wait(0.5)
+                    updateEventStatus("Respawned at event")
+                elseif EventSettings.originalCFrame then
+                    newCharacter:PivotTo(EventSettings.originalCFrame)
+                    setupWaterWalking(newCharacter, rootPart, true)
+                    updateEventStatus("Returned to farm location")
+                end
+            end
+        end)
+    end
+end)
 
-local chooseEvent = evt:AddDropdown({
-    Title = "Select Event",
-    Options = activeEvents,
+local evt = Teleport:AddSection("Auto Event Teleport")
+
+local priorityEventDropdown = evt:AddDropdown({
+    Title = "Prioritize Event",
+    Options = getAvailableEvents(),
     Multi = false,
     Default = {},
     Callback = function(selected)
         if type(selected) == "table" and #selected > 0 then
-            State.selectedEvent = selected[1]
+            EventSettings.priorityEvent = selected[1]
         elseif type(selected) == "string" then
-            State.selectedEvent = selected
+            EventSettings.priorityEvent = selected
         else
-            State.selectedEvent = nil
+            EventSettings.priorityEvent = nil
+        end
+    end
+})
+
+local selectedEventsDropdown = evt:AddDropdown({
+    Title = "Select Events",
+    Options = getAvailableEvents(),
+    Multi = true,
+    Default = {},
+    Callback = function(selected)
+        EventSettings.selectedEvents = {}
+        for _, eventName in ipairs(selected) do
+            table.insert(EventSettings.selectedEvents, eventName)
         end
     end
 })
@@ -1747,16 +1888,91 @@ local chooseEvent = evt:AddDropdown({
 evt:AddButton({
     Title = "Refresh Event List",
     Callback = function()
-        local events = GetActiveEvents()
-        chooseEvent:Refresh(events)
+        local events = getAvailableEvents()
+        priorityEventDropdown:Refresh(events)
+        selectedEventsDropdown:Refresh(events)
+        AIKO:MakeNotify({
+            Title = "@aikoware",
+            Description = "| Event List",
+            Content = "Refreshed! Found " .. #events .. " events",
+            Delay = 3
+        })
     end
 })
+
+local autoEventToggle = evt:AddToggle({
+    Title = "Auto Teleport to Event",
+    Default = false,
+    Callback = function(enabled)
+        EventSettings.autoEventActive = enabled
+        
+        if enabled then
+            if #EventSettings.selectedEvents == 0 and not EventSettings.priorityEvent then
+                AIKO:MakeNotify({
+                    Title = "@aikoware",
+                    Description = "| Error",
+                    Content = "Please select at least one event!",
+                    Delay = 3
+                })
+                EventSettings.autoEventActive = false
+                return
+            end
+            
+            EventSettings.originalCFrame = EventSettings.originalCFrame or 
+                                          getCharacterRoot(LocalPlayer.Character).CFrame
+            task.spawn(EventSettings.loop)
+            
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Auto Event",
+                Content = "Enabled!",
+                Delay = 2
+            })
+        else
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Auto Event",
+                Content = "Disabled!",
+                Delay = 2
+            })
+        end
+    end
+})
+
+evt:AddDivider()
 
 evt:AddButton({
     Title = "Teleport to Event",
     Callback = function()
-        if State.selectedEvent then
-            TeleportToEvent(State.selectedEvent)
+        if EventSettings.priorityEvent then
+            local eventPart = findEventLocation(EventSettings.priorityEvent)
+            if eventPart then
+                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local offset = EventSettings.offsets[EventSettings.priorityEvent] or 7
+                    hrp.CFrame = eventPart.CFrame + Vector3.new(0, offset, 0)
+                    AIKO:MakeNotify({
+                        Title = "@aikoware",
+                        Description = "| Teleported",
+                        Content = "Teleported to " .. EventSettings.priorityEvent,
+                        Delay = 3
+                    })
+                end
+            else
+                AIKO:MakeNotify({
+                    Title = "@aikoware",
+                    Description = "| Error",
+                    Content = "Event not found or not active",
+                    Delay = 3
+                })
+            end
+        else
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Error",
+                Content = "No priority event selected",
+                Delay = 3
+            })
         end
     end
 })
