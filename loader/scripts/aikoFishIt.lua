@@ -1914,6 +1914,12 @@ end)
 
 local evt = Teleport:AddSection("Auto Event Teleport")
 
+evt:AddParagraph({
+    Title = "Event TP Info",
+    Icon = "info",
+    Content = "Make sure to select one option in Prioritize dropdown first. Otherwise, it will not work even if you selected one in Select Events dropdown.",
+})
+
 local priorityEventDropdown = evt:AddDropdown({
     Title = "Prioritize Event",
     Options = getAvailableEvents(),
@@ -1943,21 +1949,6 @@ local selectedEventsDropdown = evt:AddDropdown({
     end
 })
 
-evt:AddButton({
-    Title = "Refresh Event List",
-    Callback = function()
-        local events = getAvailableEvents()
-        priorityEventDropdown:Refresh(events)
-        selectedEventsDropdown:Refresh(events)
-        AIKO:MakeNotify({
-            Title = "@aikoware",
-            Description = "| Event List",
-            Content = "Refreshed! Found " .. #events .. " events",
-            Delay = 3
-        })
-    end
-})
-
 local autoEventToggle = evt:AddToggle({
     Title = "Auto Teleport to Event",
     Default = false,
@@ -1982,14 +1973,14 @@ local autoEventToggle = evt:AddToggle({
             
             AIKO:MakeNotify({
                 Title = "@aikoware",
-                Description = "| Auto Event",
+                Description = "| Auto Teleport Event",
                 Content = "Enabled!",
                 Delay = 2
             })
         else
             AIKO:MakeNotify({
                 Title = "@aikoware",
-                Description = "| Auto Event",
+                Description = "| Auto Teleport Event",
                 Content = "Disabled!",
                 Delay = 2
             })
@@ -1997,7 +1988,20 @@ local autoEventToggle = evt:AddToggle({
     end
 })
 
-evt:AddDivider()
+evt:AddButton({
+    Title = "Refresh Event List",
+    Callback = function()
+        local events = getAvailableEvents()
+        priorityEventDropdown:Refresh(events)
+        selectedEventsDropdown:Refresh(events)
+        AIKO:MakeNotify({
+            Title = "@aikoware",
+            Description = "| Event List",
+            Content = "Refreshed! Found " .. #events .. " events",
+            Delay = 3
+        })
+    end
+})
 
 evt:AddButton({
     Title = "Teleport to Event",
