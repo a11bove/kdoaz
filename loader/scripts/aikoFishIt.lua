@@ -398,10 +398,27 @@ fsh:AddButton({
     end
 })
 
+local MiniEvent = net:WaitForChild("RE/FishingMinigameChanged")
+
+_G.FishMiniData = {}
+_G.DelayComplete = 1
+
+if MiniEvent then
+    if _G._MiniEventConn then
+        _G._MiniEventConn:Disconnect()
+    end
+    _G._MiniEventConn = MiniEvent.OnClientEvent:Connect(function(eventType, eventData)
+        if eventType and eventData then
+            _G.FishMiniData = eventData
+        end
+    end)
+end
+
 local fin = Fishing:AddSection("Instant")
 
 _G.canFish = true
 _G.InstantFishingEnabled = false
+_G.DelayComplete = _G.DelayComplete or 1
 
 local function InstantFishCycle()
     while _G.InstantFishingEnabled do
@@ -419,18 +436,38 @@ local function InstantFishCycle()
                     RequestFishingMinigame:InvokeServer(-1, 0.999, guid)
                 end)
                 
+                -- Wait for minigame data
                 local startTime = tick()
                 repeat
                     task.wait()
                 until (_G.FishMiniData and _G.FishMiniData.LastShift) or (tick() - startTime > 1)
                 
-                task.wait(_G.DelayComplete or 1)
+                -- Wait for completion delay
+                task.wait(tonumber(_G.DelayComplete) or 1)
                 
                 pcall(function()
                     FishingCompleted:FireServer()
                 end)
                 
-                task.wait(0.5)
+                -- Wait for fish to be caught
+                local fishCount = 0
+                pcall(function()
+                    local bagSize = LocalPlayer.PlayerGui.Inventory.Main.Top.Options.Fish.Label.BagSize
+                    fishCount = tonumber((bagSize.Text or "0/???"):match("(%d+)/")) or 0
+                end)
+                
+                local waitStart = tick()
+                repeat
+                    task.wait()
+                    local newCount = 0
+                    pcall(function()
+                        local bagSize = LocalPlayer.PlayerGui.Inventory.Main.Top.Options.Fish.Label.BagSize
+                        newCount = tonumber((bagSize.Text or "0/???"):match("(%d+)/")) or 0
+                    end)
+                    if newCount > fishCount then
+                        break
+                    end
+                until tick() - waitStart > 1
             end
             
             pcall(function()
@@ -439,7 +476,7 @@ local function InstantFishCycle()
             
             _G.canFish = true
         end
-        task.wait()
+        task.wait(0.1)
     end
 end
 
@@ -450,20 +487,41 @@ fin:AddToggle({
     Callback = function(enabled)
         _G.InstantFishingEnabled = enabled
         if enabled then
-            EquipToolFromHotbar:FireServer(1)
+            pcall(function()
+                EquipToolFromHotbar:FireServer(1)
+            end)
             task.wait(0.5)
             task.spawn(InstantFishCycle)
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Instant Fishing",
+                Content = "Enabled",
+                Delay = 2
+            })
+        else
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Instant Fishing",
+                Content = "Disabled",
+                Delay = 2
+            })
         end
     end
 })
 
 local CompleteDelayInput = fin:AddInput({
-    Title = "Delay",
+    Title = "Delay Complete",
     Placeholder = "1",
     Callback = function(value)
         local delay = tonumber(value)
         if delay and delay >= 0 then
             _G.DelayComplete = delay
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Delay Set",
+                Content = "Delay: " .. delay .. "s",
+                Delay = 2
+            })
         end
     end
 })
