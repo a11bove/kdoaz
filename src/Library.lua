@@ -1332,6 +1332,7 @@ end
             FeatureFrame.Position = UDim2.new(1, -5, 0.5, 0)
             FeatureFrame.Size = UDim2.new(0, 20, 0, 20)
             FeatureFrame.Name = "FeatureFrame"
+            FeatureFrame.ClipsDescendants = true
             FeatureFrame.Parent = SectionReal
 
             FeatureImg.Image = "rbxassetid://16851841101"
@@ -1342,7 +1343,8 @@ end
             FeatureImg.BorderSizePixel = 0
             FeatureImg.Position = UDim2.new(0.5, 0, 0.5, 0)
             FeatureImg.Rotation = -90
-            FeatureImg.Size = UDim2.new(1, 6, 1, 6)
+            FeatureImg.Size = UDim2.new(0, 16, 0, 16)
+            -- FeatureImg.Size = UDim2.new(1, 6, 1, 6)
             FeatureImg.Name = "FeatureImg"
             FeatureImg.Parent = FeatureFrame
 
