@@ -228,30 +228,30 @@ function castWithBarRelease()
     local PlayerGui = LocalPlayer.PlayerGui
     local Camera = workspace.CurrentCamera
     local CenterPosition = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-    
+
     pcall(function()
         CancelFishingInputs:InvokeServer()
     end)
-    
+
     pcall(function()
         FishingController:RequestChargeFishingRod(CenterPosition, false)
     end)
-    
+
     local ChargeBar = PlayerGui:WaitForChild("Charge"):WaitForChild("Main"):WaitForChild("CanvasGroup"):WaitForChild("Bar")
-    
+
     repeat
         task.wait()
     until ChargeBar.Size.Y.Scale > 0
-    
+
     local StartTime = tick()
-    
+
     while ChargeBar:IsDescendantOf(PlayerGui) and ChargeBar.Size.Y.Scale < 0.93 do
         task.wait()
         if tick() - StartTime > 2 then
             break
         end
     end
-    
+
     if MouseReleaseCallback then
         pcall(MouseReleaseCallback)
     end
@@ -260,31 +260,38 @@ end
 function StartLegitFishing(enabled)
     FishingController._autoLoop = enabled
     FishingController._autoShake = enabled
-    
+
     if enabled then
+        task.spawn(function()
+            pcall(function()
+                EquipToolFromHotbar:FireServer(1)
+            end)
+            task.wait(0.5)
+        end)
+
         task.spawn(function()
             local UserId = tostring(LocalPlayer.UserId)
             local CosmeticFolder = workspace:WaitForChild("CosmeticFolder")
-            
+
             while FishingController._autoLoop do
                 if not CosmeticFolder:FindFirstChild(UserId) then
                     castWithBarRelease()
                     task.wait(0.2)
                 end
-                
+
                 while CosmeticFolder:FindFirstChild(UserId) and FishingController._autoLoop do
                     task.wait(0.2)
                 end
-                
+
                 task.wait(0.2)
             end
         end)
-        
+
         local ClickEffect = LocalPlayer.PlayerGui:FindFirstChild("!!! Click Effect")
         if ClickEffect then
             ClickEffect.Enabled = false
         end
-        
+
         task.spawn(function()
             while FishingController._autoShake do
                 pcall(function()
@@ -306,12 +313,21 @@ fsh:AddToggle({
     Content = "",
     Default = false,
     Callback = function(enabled)
-        EquipToolFromHotbar:FireServer(1)
+        if enabled then
+            task.spawn(function()
+                pcall(function()
+                    EquipToolFromHotbar:FireServer(1)
+                end)
+                task.wait(0.3)
+                StartLegitFishing(enabled)
+            end)
+        else
             StartLegitFishing(enabled)
-        
+        end
+
         local playerGui = LocalPlayer:WaitForChild("PlayerGui")
         local fishingGui = playerGui:WaitForChild("Fishing"):WaitForChild("Main")
-        
+
         if enabled then
             fishingGui.Visible = false
         else
@@ -325,7 +341,7 @@ fsh:AddButton({
     Content = "",
     Callback = function()
         StartLegitFishing(false)
-        
+
         AIKO:MakeNotify({
             Title = "@aikoware",
             Description = "| Manual Fix Stuck",
@@ -346,7 +362,7 @@ if MiniEvent then
     if _G._MiniEventConn then
         _G._MiniEventConn:Disconnect()
     end
-    
+
     _G._MiniEventConn = MiniEvent.OnClientEvent:Connect(function(param1, param2)
         if param1 and param2 then
             _G.FishMiniData = param2
@@ -356,42 +372,51 @@ end
 
 local function StartInstantFishing(enabled)
     InstantFishEnabled = enabled
-    
+
     if enabled then
         task.spawn(function()
+            pcall(function()
+                EquipToolFromHotbar:FireServer(1)
+            end)
+            task.wait(0.5)
+        end)
+
+        task.spawn(function()
+            task.wait(0.5)
+
             while InstantFishEnabled do
                 pcall(function()
                     local success, _, rodGUID = pcall(function()
                         return ChargeFishingRod:InvokeServer(workspace:GetServerTimeNow())
                     end)
-                    
+
                     if success and typeof(rodGUID) == "number" then
                         local ProgressValue = -1
                         local SuccessRate = 0.999
-                        
+
                         task.wait(0.3)
-                        
+
                         pcall(function()
                             RequestFishingMinigame:InvokeServer(ProgressValue, SuccessRate, rodGUID)
                         end)
-                        
+
                         local WaitStart = tick()
                         repeat
                             task.wait()
                         until _G.FishMiniData and _G.FishMiniData.LastShift or tick() - WaitStart > 1
-                        
+
                         task.wait(InstantDelayComplete)
-                        
+
                         pcall(function()
                             FishingCompleted:FireServer()
                         end)
-                        
+
                         local CurrentCount = getFishCount()
                         local CountWaitStart = tick()
                         repeat
                             task.wait()
                         until CurrentCount < getFishCount() or tick() - CountWaitStart > 1
-                        
+
                         pcall(function()
                             CancelFishingInputs:InvokeServer()
                         end)
@@ -414,7 +439,10 @@ fin:AddToggle({
     Default = false,
     Callback = function(enabled)
         if enabled then
-            EquipToolFromHotbar:FireServer(1)
+            pcall(function()
+                EquipToolFromHotbar:FireServer(1)
+            end)
+            task.wait(0.5)
             StartInstantFishing(true)
         else
             StartInstantFishing(false)
@@ -429,6 +457,12 @@ fin:AddInput({
         local delay = tonumber(value)
         if delay and delay >= 0 then
             InstantDelayComplete = delay
+            AIKO:MakeNotify({
+                Title = "@aikoware",
+                Description = "| Complete Delay",
+                Content = "Set to " .. delay,
+                Delay = 2
+            })
         end
     end
 })
@@ -465,11 +499,16 @@ end
 
 function StartBlatantFishing()
     _G.FBlatant = true
-    EquipToolFromHotbar:FireServer(1)
+
+    pcall(function()
+        EquipToolFromHotbar:FireServer(1)
+    end)
 
     LocalPlayer:SetAttribute("Loading", nil)
 
     task.spawn(function()
+        task.wait(0.5) -- Wait for rod to equip
+
         while _G.FBlatant do
             FastestFishing()
             task.wait(_G.Reel)
@@ -541,6 +580,12 @@ bts:AddButton({
     Title = "Manual Fix Stuck",
     Callback = function()
         RecoveryFishing()
+        AIKO:MakeNotify({
+            Title = "@aikoware",
+            Description = "| Manual Fix",
+            Content = "Stuck Fixed",
+            Delay = 2
+        })
     end
 })
 
