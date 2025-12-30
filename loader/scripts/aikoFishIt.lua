@@ -400,6 +400,77 @@ fsh:AddButton({
 
 local fin = Fishing:AddSection("Instant")
 
+_G.canFish = true
+_G.InstantFishingEnabled = false
+
+local function InstantFishCycle()
+    while _G.InstantFishingEnabled do
+        if _G.canFish then
+            _G.canFish = false
+            
+            local success, guid = pcall(function()
+                return ChargeFishingRod:InvokeServer(workspace:GetServerTimeNow())
+            end)
+            
+            if success and typeof(guid) == "number" then
+                task.wait(0.3)
+                
+                pcall(function()
+                    RequestFishingMinigame:InvokeServer(-1, 0.999, guid)
+                end)
+                
+                local startTime = tick()
+                repeat
+                    task.wait()
+                until (_G.FishMiniData and _G.FishMiniData.LastShift) or (tick() - startTime > 1)
+                
+                task.wait(_G.DelayComplete or 1)
+                
+                pcall(function()
+                    FishingCompleted:FireServer()
+                end)
+                
+                task.wait(0.5)
+            end
+            
+            pcall(function()
+                CancelFishingInputs:InvokeServer()
+            end)
+            
+            _G.canFish = true
+        end
+        task.wait()
+    end
+end
+
+fin:AddToggle({
+    Title = "Instant Fishing",
+    Content = "",
+    Default = false,
+    Callback = function(enabled)
+        _G.InstantFishingEnabled = enabled
+        if enabled then
+            EquipToolFromHotbar:FireServer(1)
+            task.wait(0.5)
+            task.spawn(InstantFishCycle)
+        end
+    end
+})
+
+local CompleteDelayInput = fin:AddInput({
+    Title = "Delay",
+    Placeholder = "1",
+    Callback = function(value)
+        local delay = tonumber(value)
+        if delay and delay >= 0 then
+            _G.DelayComplete = delay
+        end
+    end
+})
+
+--[[
+local fin = Fishing:AddSection("Instant")
+
 local InstantFishEnabled = false
 local CancelDelay = 0.1
 local CompleteDelay = 1
@@ -487,7 +558,7 @@ local SuperCompleteDelayInput = fin:AddInput({
             CancelDelayInput:Set(tostring(CancelDelay))
         end
     end
-})
+}) ]]
 
 local bts = Fishing:AddSection("Blatant")
 
