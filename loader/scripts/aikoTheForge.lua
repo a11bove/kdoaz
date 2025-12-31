@@ -873,34 +873,13 @@ local Window = AIKO:Window({
 })
 
 local Tabs = {
-    Info = Window:AddTab({
-        Name = "Home",
-        Icon = "home"
-    }),
-    MainFarm = Window:AddTab({
-        Name = "Main",
-        Icon = "sword"
-    }),
-    AutoForge = Window:AddTab({
-		Name = "Forge",
-		Icon = "hammer"
-	}),
-    Auto = Window:AddTab({
-        Name = "Auto",
-        Icon = "loop"
-    }),
-    AutoSell = Window:AddTab({
-        Name = "Sell",
-        Icon = "shop"
-    }),
-    Webhook = Window:AddTab({
-        Name = "Webhook",
-        Icon = "bell"
-    }),
-    Teleport = Window:AddTab({
-        Name = "Teleport",
-        Icon = "map-pin"
-    }),
+    Info = Window:AddTab({ Name = "Home", Icon = "home" }),
+    MainFarm = Window:AddTab({ Name = "Main", Icon = "sword" }),
+    AutoForge = Window:AddTab({ Name = "Forge", Icon = "hammer" }),
+    Auto = Window:AddTab({ Name = "Auto", Icon = "loop" }),
+    AutoSell = Window:AddTab({ Name = "Sell", Icon = "shop" }),
+    Webhook = Window:AddTab({ Name = "Webhook", Icon = "bell" }),
+    Teleport = Window:AddTab({ Name = "Teleport", Icon = "map-pin" }),
 }
 
 local InfoSection = Tabs.Info:AddSection("Support", true)
