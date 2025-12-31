@@ -5,7 +5,6 @@ local G2L = {}
 
 G2L["ScreenGui_1"] = Instance.new("ScreenGui", game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"))
 G2L["ScreenGui_1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling
-G2L["ScreenGui_1"]["IgnoreGuiInset"] = true
 G2L["ScreenGui_1"]["ResetOnSpawn"] = false
 CollectionService:AddTag(G2L["ScreenGui_1"], "main")
 
@@ -13,30 +12,13 @@ G2L["Frame_2"] = Instance.new("Frame", G2L["ScreenGui_1"])
 G2L["Frame_2"]["BorderSizePixel"] = 0
 G2L["Frame_2"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["Frame_2"]["Size"] = UDim2.new(0, 350, 0, 450)
-G2L["Frame_2"]["Position"] = UDim2.new(0.5, -175, 0.5, -225)
+G2L["Frame_2"]["Position"] = UDim2.fromScale(0.5, 0.5)
 G2L["Frame_2"]["AnchorPoint"] = Vector2.new(0.5, 0.5)
 G2L["Frame_2"]["BackgroundTransparency"] = 0.4
 G2L["Frame_2"]["ZIndex"] = 2
 
 G2L["UICorner_3"] = Instance.new("UICorner", G2L["Frame_2"])
 G2L["UICorner_3"].CornerRadius = UDim.new(0, 20)
-
-local UIGradient = Instance.new("UIGradient", G2L["Frame_2"])
-UIGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(25, 25, 35)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 15, 20))
-})
-UIGradient.Rotation = 45
-
-local Glow = Instance.new("ImageLabel", G2L["Frame_2"])
-Glow["BackgroundTransparency"] = 1
-Glow["Size"] = UDim2.new(1, 60, 1, 60)
-Glow["Position"] = UDim2.new(0.5, -30, 0.5, -30)
-Glow["AnchorPoint"] = Vector2.new(0.5, 0.5)
-Glow["Image"] = "rbxassetid://5028857084"
-Glow["ImageColor3"] = Color3.fromRGB(46, 205, 255)
-Glow["ImageTransparency"] = 0.7
-Glow["ZIndex"] = 1
 
 G2L["TextLabel_6"] = Instance.new("TextLabel", G2L["Frame_2"])
 G2L["TextLabel_6"]["BorderSizePixel"] = 0
@@ -86,18 +68,6 @@ DiscordLink.MouseButton1Click:Connect(function()
     end
 end)
 
-DiscordLink.MouseButton1Down:Connect(function()
-    TweenService:Create(DiscordLink, TweenInfo.new(0.1), {
-        BackgroundTransparency = 0
-    }):Play()
-end)
-
-DiscordLink.MouseButton1Up:Connect(function()
-    TweenService:Create(DiscordLink, TweenInfo.new(0.1), {
-        BackgroundTransparency = 0.2
-    }):Play()
-end)
-
 local LogoFrame = Instance.new("Frame", G2L["Frame_2"])
 LogoFrame["BackgroundTransparency"] = 1
 LogoFrame["Size"] = UDim2.new(0, 140, 0, 140)
@@ -112,9 +82,6 @@ LogoImage["Image"] = "rbxassetid://105338847670181"
 LogoImage["ScaleType"] = Enum.ScaleType.Fit
 LogoImage["Name"] = "LogoImage"
 LogoImage["ZIndex"] = 3
-
-local LogoCorner = Instance.new("UICorner", LogoImage)
-LogoCorner.CornerRadius = UDim.new(0, 0)
 
 local PlaceholderLogo = Instance.new("Frame", LogoFrame)
 PlaceholderLogo["BackgroundColor3"] = Color3.fromRGB(46, 205, 255)
@@ -137,16 +104,6 @@ PlaceholderText["Text"] = "AK"
 PlaceholderText["TextXAlignment"] = Enum.TextXAlignment.Center
 PlaceholderText["TextYAlignment"] = Enum.TextYAlignment.Center
 PlaceholderText["ZIndex"] = 4
-
-task.spawn(function()
-    while true do
-        TweenService:Create(PlaceholderLogo, TweenInfo.new(3, Enum.EasingStyle.Linear), {
-            Rotation = 360
-        }):Play()
-        task.wait(3)
-        PlaceholderLogo.Rotation = 0
-    end
-end)
 
 G2L["TextLabel_8"] = Instance.new("TextLabel", G2L["Frame_2"])
 G2L["TextLabel_8"]["BorderSizePixel"] = 0
@@ -225,20 +182,6 @@ G2L["UnloadButton"]["ZIndex"] = 3
 local buttonCorner = Instance.new("UICorner", G2L["UnloadButton"])
 buttonCorner.CornerRadius = UDim.new(0, 12)
 
-G2L["UnloadButton"].MouseButton1Down:Connect(function()
-    TweenService:Create(G2L["UnloadButton"], TweenInfo.new(0.1), {
-        Size = UDim2.new(0, 190, 0, 43),
-        BackgroundColor3 = Color3.fromRGB(200, 50, 45)
-    }):Play()
-end)
-
-G2L["UnloadButton"].MouseButton1Up:Connect(function()
-    TweenService:Create(G2L["UnloadButton"], TweenInfo.new(0.1), {
-        Size = UDim2.new(0, 200, 0, 45),
-        BackgroundColor3 = Color3.fromRGB(255, 69, 58)
-    }):Play()
-end)
-
 -- UNLOAD BUTTON FUNCTIONALITY
 G2L["UnloadButton"].MouseButton1Click:Connect(function()
     -- Stop all farming toggles
@@ -255,30 +198,9 @@ G2L["UnloadButton"].MouseButton1Click:Connect(function()
         lp.Character.HumanoidRootPart.Anchored = false
     end
     
-    -- Animate the UI out
-    TweenService:Create(G2L["Frame_2"], TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-        Size = UDim2.new(0, 0, 0, 0)
-    }):Play()
-    
-    -- Wait for animation, then destroy
-    task.wait(0.3)
-    
+    -- Destroy immediately
     if G2L["ScreenGui_1"] then
         G2L["ScreenGui_1"]:Destroy()
-    end
-end)
-
--- Glow animation loop
-task.spawn(function()
-    while true do
-        TweenService:Create(Glow, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            ImageTransparency = 0.5
-        }):Play()
-        task.wait(2)
-        TweenService:Create(Glow, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-            ImageTransparency = 0.8
-        }):Play()
-        task.wait(2)
     end
 end)
 
