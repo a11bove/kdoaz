@@ -2,7 +2,7 @@ local AIKO = loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/
 
 local Window = AIKO:Window({
     Title   = "@aikoware |",
-    Footer  = " made by untog",
+    Footer  = "made by untog",
     Version = 1,
 })
 
