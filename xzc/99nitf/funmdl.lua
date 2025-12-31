@@ -126,7 +126,7 @@ end
 -- Load Auto Days Farm
 function FunModule.LoadAutoDaysFarm()
     pcall(function()
-        loadstring(game:HttpGet("https://paste.rs/Gc9QX", true))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/xzc/99nitf/daysfrm.lua", true))()
     end)
 end
 
