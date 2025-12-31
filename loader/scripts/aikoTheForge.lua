@@ -66,6 +66,32 @@ local autoSell = {
     sellAmount = 100,
 }
 
+local UseInstantTPMine = false
+
+local UseInstantTPEnemy = false
+
+local autoParry = {
+    enabled = false,
+    parryAnimations = {
+        ["rbxassetid://106199289601358"] = 0.433,
+        ["rbxassetid://97668319966803"] = 0.3,
+        ["rbxassetid://89496572417272"] = 0.44,
+        ["rbxassetid://82533430458765"] = 0.37,
+        ["rbxassetid://98266710251041"] = 0.25,
+        ["rbxassetid://73829363877010"] = 0.43,
+        ["rbxassetid://131510736644901"] = 0.4,
+        ["rbxassetid://89127058244517"] = 0.59,
+        ["rbxassetid://107274803323874"] = 0.93,
+    }
+}
+
+local webhook = {
+    enabled = false,
+    url = "",
+    userId = "",
+    selectedOres = {},
+}
+
 local currentInvOptions = {"Click Refresh Inventory"}
 local InvDropdown
 local autoMovementRunning = false
@@ -196,9 +222,18 @@ local function TweenToRock(Part)
     if not Character then return false end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
     if not (RootPart and Part and Part.Parent) then return false end
+
     local OffsetY = -(MineDistance or 3)
     local TargetPos = Part.Position + Vector3.new(0, OffsetY, 0)
     local LookAt = Part.Position + Vector3.new(0, 5, 0)
+
+    if UseInstantTPMine then
+        RootPart.CFrame = CFrame.new(TargetPos, LookAt)
+        RootPart.Velocity = Vector3.new(0, 0, 0)
+        task.wait(0.1)
+        return true
+    end
+
     local Dist = (RootPart.Position - TargetPos).Magnitude
     local Time = Dist / MineTweenSpeed
     local Tween = TweenService:Create(RootPart, TweenInfo.new(Time, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
@@ -358,6 +393,14 @@ local function TweenToEnemy(Mob, OffsetY)
         pcall(function() CurrentEnemyTween:Cancel() end)
     end
     local TargetPos = MobRoot.Position + Vector3.new(0, OffsetY, 0)
+
+    if UseInstantTPEnemy then
+        RootPart.CFrame = CFrame.new(TargetPos, MobRoot.Position)
+        RootPart.Velocity = Vector3.new(0, 0, 0)
+        task.wait(0.1)
+        return true
+    end
+
     local Dist = (RootPart.Position - TargetPos).Magnitude
     local Time = Dist / FarmTweenSpeed
     CurrentEnemyTween = TweenService:Create(RootPart, TweenInfo.new(Time, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), {
@@ -672,6 +715,107 @@ local function TweenToTarget(TargetName, IsNPC)
     return true
 end
 
+local function sendWebhookNotification(title, description, color, fields)
+    if not webhook.enabled or webhook.url == "" then return end
+
+    local embed = {
+        ["title"] = title,
+        ["description"] = description,
+        ["color"] = color or 15158332,
+        ["fields"] = fields or {},
+        ["timestamp"] = DateTime.now():ToIsoDate(),
+        ["footer"] = {
+            ["text"] = "@aikoware - The Forge"
+        }
+    }
+
+    local data = {
+        ["embeds"] = {embed}
+    }
+
+    if webhook.userId ~= "" then
+        data["content"] = "<@" .. webhook.userId .. ">"
+    end
+
+    local success, response = pcall(function()
+        return HttpService:JSONEncode(data)
+    end)
+
+    if success then
+        pcall(function()
+            local httpRequest = (syn and syn.request) or http_request or request
+            if httpRequest then
+                httpRequest({
+                    Url = webhook.url,
+                    Method = "POST",
+                    Headers = {
+                        ["Content-Type"] = "application/json"
+                    },
+                    Body = response
+                })
+            end
+        end)
+    end
+end
+
+local function setupAutoParry(npcModel)
+    if not autoParry.enabled then return end
+
+    task.spawn(function()
+        local hrp = npcModel:WaitForChild("HumanoidRootPart", 5)
+        if not hrp then return end
+
+        local infoFrame = hrp:WaitForChild("infoFrame", 5)
+        if not infoFrame then return end
+
+        local frame = infoFrame:WaitForChild("Frame", 5)
+        if not frame then return end
+
+        local rockName = frame:WaitForChild("rockName", 5)
+        if not rockName or not rockName:IsA("TextLabel") then return end
+
+        if not string.find(rockName.Text, "Slime") then return end
+
+        local status = npcModel:WaitForChild("Status", 5)
+        if not status then return end
+
+        status.ChildAdded:Connect(function(child)
+            if not autoParry.enabled then return end
+
+            if child:IsA("BoolValue") and child.Name == "Attacking" then
+                task.wait(0.1)
+                local char = getCharacter()
+                if char then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then
+                        pcall(function()
+                            local toolRF = ReplicatedStorage.Shared.Packages.Knit.Services.ToolService.RF.ToolActivated
+                            toolRF:InvokeServer("Parry")
+                        end)
+                    end
+                end
+            end
+        end)
+    end)
+end
+
+local function initializeAutoParry()
+    local Living = workspace:FindFirstChild("Living")
+    if not Living then return end
+
+    for _, npc in ipairs(Living:GetChildren()) do
+        if npc:IsA("Model") then
+            setupAutoParry(npc)
+        end
+    end
+
+    Living.ChildAdded:Connect(function(npc)
+        if npc:IsA("Model") then
+            setupAutoParry(npc)
+        end
+    end)
+end
+
 local AIKO = loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/src/Library.lua"))()
 
 local Window = AIKO:Window({
@@ -686,6 +830,7 @@ local Tabs = {
     AutoForge = Window:AddTab({ Name = "Forge", Icon = "hammer" }),
     Auto = Window:AddTab({ Name = "Auto", Icon = "loop" }),
     AutoSell = Window:AddTab({ Name = "Sell", Icon = "shop" }),
+    Webhook = Window:AddTab({ Name = "Webhook", Icon = "bell" }),
     Teleport = Window:AddTab({ Name = "Teleport", Icon = "map-pin" }),
 }
 
@@ -824,6 +969,20 @@ OreFarmSection:AddSlider({
 })
 
 OreFarmSection:AddToggle({
+    Title = "Use Instant TP",
+    Content = "Instantly teleport instead of tweening",
+    Default = false,
+    Callback = function(v)
+        UseInstantTPMine = v
+        if v then
+            aiko("Instant TP for mining enabled!")
+        else
+            aiko("Instant TP for mining disabled")
+        end
+    end
+})
+
+OreFarmSection:AddToggle({
     Title = "Auto Mine",
     Default = false,
     Callback = function(v)
@@ -927,16 +1086,29 @@ MobFarmSection:AddSlider({
 })
 
 MobFarmSection:AddToggle({
-    Title = "Auto Farm Enemy",
+    Title = "Use Instant TP",
+    Default = false,
+    Callback = function(v)
+        UseInstantTPEnemy = v
+        if v then
+            aiko("Instant TP for mob farming enabled!")
+        else
+            aiko("Instant TP for mob farming disabled")
+        end
+    end
+})
+
+MobFarmSection:AddToggle({
+    Title = "Auto Farm Mobs",
     Default = false,
     Callback = function(v)
         AutoFarmEnemyEnabled = v
         if v and (not EnemyTypes or #EnemyTypes == 0) then
             aiko("Please select an enemy type!")
         elseif v then
-            aiko("Auto farm enemy started!")
+            aiko("Auto farm mobs started!")
         else
-            aiko("Auto farm enemy stopped")
+            aiko("Auto farm mobs stopped")
         end
     end
 })
@@ -1183,6 +1355,22 @@ AutoMoveSection:AddToggle({
     end
 })
 
+local AutoParrySection = Tabs.Auto:AddSection("Auto Parry")
+
+AutoParrySection:AddToggle({
+    Title = "Auto Parry",
+    Default = false,
+    Callback = function(v)
+        autoParry.enabled = v
+        if v then
+            initializeAutoParry()
+            aiko("Auto parry enabled!")
+        else
+            aiko("Auto parry disabled")
+        end
+    end
+})
+
 local AutoSellSection = Tabs.AutoSell:AddSection("Auto Sell")
 
 local function RefreshInventoryList()
@@ -1340,6 +1528,83 @@ AutoSellSection:AddToggle({
     end
 })
 
+local WebhookSection = Tabs.Webhook:AddSection("Webhook Settings")
+
+WebhookSection:AddInput({
+    Title = "Webhook URL",
+    Placeholder = "https://discord.com/api/webhooks/...",
+    Callback = function(v)
+        webhook.url = v
+        aiko("Webhook URL updated!")
+    end
+})
+
+WebhookSection:AddInput({
+    Title = "User ID (Optional)",
+    Placeholder = "123456789012345678",
+    Callback = function(v)
+        webhook.userId = v
+        if v ~= "" then
+            aiko("User ID set!")
+        end
+    end
+})
+
+WebhookSection:AddDropdown({
+    Title = "Select Ore",
+    Content = "Select ores to get notified about",
+    Multi = true,
+    Options = oreOptions,
+    Default = {},
+    Callback = function(opts)
+        if type(opts) == "table" then
+            webhook.selectedOres = opts
+            aiko("Webhook ores updated!")
+        end
+    end
+})
+
+WebhookSection:AddButton({
+    Title = "Test Webhook",
+    Callback = function()
+        if webhook.url == "" then
+            aiko("Please set webhook URL first!")
+            return
+        end
+        sendWebhookNotification(
+            "🔔 Test Notification",
+            "Webhook is working correctly!",
+            3447003,
+            {
+                {
+                    ["name"] = "Status",
+                    ["value"] = "Connected",
+                    ["inline"] = true
+                }
+            }
+        )
+        aiko("Test notification sent!")
+    end
+})
+
+WebhookSection:AddToggle({
+    Title = "Enable Webhook",
+    Default = false,
+    Callback = function(v)
+        webhook.enabled = v
+        if v then
+            if webhook.url == "" then
+                aiko("Please set webhook URL first!")
+                webhook.enabled = false
+                return
+            end
+            aiko("Webhook notifications enabled!")
+        else
+            aiko("Webhook notifications disabled")
+        end
+    end
+})
+
 local TeleportNPCSection = Tabs.Teleport:AddSection("NPC")
 
 AllNPCs = GetAllNPCs()
@@ -1405,6 +1670,42 @@ TeleportShopSection:AddButton({
         else
             aiko("Please select a shop!")
         end
+    end
+})
+
+local TeleportWorldSection = Tabs.Teleport:AddSection("World Teleport")
+
+TeleportWorldSection:AddButton({
+    Title = "Teleport to World 1",
+    Content = "Stonewake's Cross",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = 129009554587176
+        if game.PlaceId == placeId then
+            aiko("You are already in World 1!")
+            return
+        end
+        aiko("Teleporting to World 1...")
+        pcall(function()
+            TeleportService:Teleport(placeId, LocalPlayer)
+        end)
+    end
+})
+
+TeleportWorldSection:AddButton({
+    Title = "Teleport to World 2",
+    Content = "Forgotten Kindom",
+    Callback = function()
+        local TeleportService = game:GetService("TeleportService")
+        local placeId = 76558904092080
+        if game.PlaceId == placeId then
+            aiko("You are already in World 2!")
+            return
+        end
+        aiko("Teleporting to World 2...")
+        pcall(function()
+            TeleportService:Teleport(placeId, LocalPlayer)
+        end)
     end
 })
 
