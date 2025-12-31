@@ -1438,7 +1438,7 @@ smp:AddButton({
 })
 
 smp:AddSubSection("Scan Map")
-smp:AddDivider
+smp:AddDivider()
 
 local _ = game:GetService("Players").LocalPlayer
 game:GetService("Workspace")
