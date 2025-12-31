@@ -8,7 +8,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local ContextActionService = game:GetService("ContextActionService")
 local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
-local Shared = ReplicatedStorage:WaitForChild("Shared")
+--[[local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Packages = Shared:WaitForChild("Packages")
 local Knit = Packages:WaitForChild("Knit")
 local Services = Knit:WaitForChild("Services")
@@ -30,7 +30,7 @@ local Forge = PlayerGui:WaitForChild("Forge")
 local MeltMinigame = Forge:WaitForChild("MeltMinigame")
 local PourMinigame = Forge:WaitForChild("PourMinigame")
 local HammerMinigame = Forge:WaitForChild("HammerMinigame")
-
+]]
 local AutoMineEnabled = false
 local RockTypes = {}
 local MineDistance = 6
