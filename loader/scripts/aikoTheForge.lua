@@ -1245,12 +1245,15 @@ local AutoForgeAPI = nil
 
 local ForgeSection = Tabs.AutoForge:AddSection("Auto Forge")
 
+-- Try to load the external module
 local success, module = pcall(function()
-    return loadstring(game:HttpGet("https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/autoforge.lua"))()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/autoforge.lua"))()
 end)
 
 if success and module then
     AutoForgeAPI = module
+    
+    -- Initialize the module with required services
     module.Initialize({
         PlayerGui = PlayerGui,
         LocalPlayer = LocalPlayer,
@@ -1277,7 +1280,8 @@ if success and module then
     })
 
     ForgeSection:AddDropdown({
-        Title = "Select Ore",
+        Title = "Select Ores",
+        Content = "Ores to use for forging",
         Multi = true,
         Options = forgeOreOptions,
         Default = {},
@@ -1291,7 +1295,7 @@ if success and module then
     ForgeSection:AddSlider({
         Title = "Ores Per Forge",
         Content = "Number of ores to use",
-        Min = 3,
+        Min = 1,
         Max = 10,
         Increment = 1,
         Default = 3,
@@ -1304,33 +1308,57 @@ if success and module then
 
     MinigameSection:AddToggle({
         Title = "Auto Melt",
+        Content = "Automatically complete melt minigame",
         Default = false,
         Callback = function(v)
             module.EnableAutoMelt(v)
+            if v then
+                aiko("Auto melt enabled!")
+            else
+                aiko("Auto melt disabled")
+            end
         end
     })
 
     MinigameSection:AddToggle({
         Title = "Auto Pour",
+        Content = "Automatically complete pour minigame",
         Default = false,
         Callback = function(v)
             module.EnableAutoPour(v)
+            if v then
+                aiko("Auto pour enabled!")
+            else
+                aiko("Auto pour disabled")
+            end
         end
     })
 
     MinigameSection:AddToggle({
         Title = "Auto Hammer",
+        Content = "Automatically complete hammer minigame",
         Default = false,
         Callback = function(v)
             module.EnableAutoHammer(v)
+            if v then
+                aiko("Auto hammer enabled!")
+            else
+                aiko("Auto hammer disabled")
+            end
         end
     })
 
     MinigameSection:AddToggle({
         Title = "Auto Mold",
+        Content = "Automatically interact with mold",
         Default = false,
         Callback = function(v)
             module.EnableAutoMold(v)
+            if v then
+                aiko("Auto mold enabled!")
+            else
+                aiko("Auto mold disabled")
+            end
         end
     })
 
@@ -1338,17 +1366,24 @@ if success and module then
 
     ForgeSection:AddToggle({
         Title = "Enable Auto Forge",
+        Content = "Start automatic forging process",
         Default = false,
         Callback = function(v)
             module.EnableAutoForge(v)
+            if v then
+                aiko("Auto forge started!")
+            else
+                aiko("Auto forge stopped")
+            end
         end
     })
 else
     ForgeSection:AddParagraph({
         Title = "Error",
-        Content = "Failed to load Auto Forge module",
+        Content = "Failed to load Auto Forge module: " .. tostring(module or "Unknown error"),
         Icon = "alert-triangle"
     })
+    warn("Auto Forge module failed to load:", module)
 end
 
 local oreOptions = buildOreOptions()
