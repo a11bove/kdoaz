@@ -155,7 +155,7 @@ local currentInvOptions = {
 local InvDropdown
 local autoMovementRunning = false
 
-local AutoForgeModule = {}
+--[[local AutoForgeModule = {}
 
 local autoForge = {
 				enabled = false,
@@ -396,7 +396,7 @@ function AutoForgeModule.EnableAutoForge(enabled)
 				autoForge.enabled = enabled
 				if enabled then startAutoForge() end
 end
-
+]]
 local function getCharacter()
     return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 end
@@ -1167,7 +1167,7 @@ local Window = AIKO:Window({
 local Tabs = {
     Info = Window:AddTab({ Name = "Home", Icon = "home" }),
     MainFarm = Window:AddTab({ Name = "Main", Icon = "sword" }),
-    AutoForge = Window:AddTab({ Name = "Forge", Icon = "hammer" }),
+    --AutoForge = Window:AddTab({ Name = "Forge", Icon = "hammer" }),
     Auto = Window:AddTab({ Name = "Auto", Icon = "loop" }),
     AutoSell = Window:AddTab({ Name = "Sell", Icon = "shop" }),
     Webhook = Window:AddTab({ Name = "Webhook", Icon = "bell" }),
@@ -1483,7 +1483,7 @@ task.spawn(function()
     end
 end)
 
-local ForgeSection = Tabs.AutoForge:AddSection("Auto Forge")
+--[[local ForgeSection = Tabs.AutoForge:AddSection("Auto Forge")
 
 -- Initialize the module with required services
 AutoForgeModule.Initialize({
@@ -1608,7 +1608,7 @@ ForgeSection:AddToggle({
 												aiko("Auto forge stopped")
 								end
 				end
-})
+})]]
 
 local oreOptions = buildOreOptions()
 
