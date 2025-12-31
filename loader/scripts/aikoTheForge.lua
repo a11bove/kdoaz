@@ -56,14 +56,14 @@ local antiAfk = {
 }
 
 local autoForge = {
-	enabled = false,
-	autoMelt = false,
-	autoPour = false,
-	autoHammer = false,
-	autoMold = false,
+    enabled = false,
+    autoMelt = false,
+    autoPour = false,
+    autoHammer = false,
+    autoMold = false,
     itemType = "Weapon", -- or "Armor"
-	selectedOres = {},
-	totalOresPerForge = 3,
+    selectedOres = {},
+    totalOresPerForge = 3,
 }
 
 local autoPotions = {
@@ -110,7 +110,9 @@ local webhook = {
     selectedOres = {},
 }
 
-local currentInvOptions = {"Click Refresh Inventory"}
+local currentInvOptions = {
+    "Click Refresh Inventory"
+}
 local InvDropdown
 local autoMovementRunning = false
 
@@ -129,7 +131,9 @@ local function getHumanoid()
 end
 
 local function AA_BindSink()
-    pcall(function() ContextActionService:UnbindAction(antiAfk.bindName) end)
+    pcall(function()
+        ContextActionService:UnbindAction(antiAfk.bindName)
+    end)
     pcall(function()
         ContextActionService:BindAction(antiAfk.bindName, function()
             return Enum.ContextActionResult.Sink
@@ -138,26 +142,38 @@ local function AA_BindSink()
 end
 
 local function AA_UnbindSink()
-    pcall(function() ContextActionService:UnbindAction(antiAfk.bindName) end)
+    pcall(function()
+        ContextActionService:UnbindAction(antiAfk.bindName)
+    end)
 end
 
 local function AA_Tap()
-    pcall(function() VirtualInputManager:SendKeyEvent(true, antiAfk.key, false, game) end)
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(true, antiAfk.key, false, game)
+    end)
     task.wait(0.06)
-    pcall(function() VirtualInputManager:SendKeyEvent(false, antiAfk.key, false, game) end)
+    pcall(function()
+        VirtualInputManager:SendKeyEvent(false, antiAfk.key, false, game)
+    end)
 end
 
 local function AA_Start()
-    if antiAfk.running then return end
+    if antiAfk.running then
+        return
+    end
     antiAfk.running = true
     AA_BindSink()
     task.spawn(function()
         while antiAfk.enabled do
             AA_Tap()
-            local waitFor = (antiAfk.interval or 60) + math.random(-2, 2)
-            if waitFor < 10 then waitFor = 10 end
+            local waitFor = (antiAfk.interval or 60) + math.random(- 2, 2)
+            if waitFor < 10 then
+                waitFor = 10
+            end
             for _ = 1, waitFor * 10 do
-                if not antiAfk.enabled then break end
+                if not antiAfk.enabled then
+                    break
+                end
                 task.wait(0.1)
             end
         end
@@ -170,9 +186,13 @@ local function GetAllRockTypes()
     AllRockTypes = {}
     local Seen = {}
     local Assets = ReplicatedStorage:FindFirstChild("Assets")
-    if not Assets then return AllRockTypes end
+    if not Assets then
+        return AllRockTypes
+    end
     local Rocks = Assets:FindFirstChild("Rocks")
-    if not Rocks then return AllRockTypes end
+    if not Rocks then
+        return AllRockTypes
+    end
     for _, Desc in ipairs(Rocks:GetDescendants()) do
         if Desc:IsA("Model") then
             local Name = Desc.Name
@@ -188,9 +208,13 @@ end
 
 local function GetRockParts(RockName)
     local Parts = {}
-    if not RockName or RockName == "" then return Parts end
+    if not RockName or RockName == "" then
+        return Parts
+    end
     local RocksFolder = workspace:FindFirstChild("Rocks")
-    if not RocksFolder then return Parts end
+    if not RocksFolder then
+        return Parts
+    end
     for _, Desc in ipairs(RocksFolder:GetDescendants()) do
         if Desc:IsA("BasePart") then
             local Model = Desc:FindFirstAncestorWhichIsA("Model")
@@ -203,11 +227,17 @@ local function GetRockParts(RockName)
 end
 
 local function GetClosestRock(RockNames)
-    if not RockNames or #RockNames == 0 then return nil end
+    if not RockNames or # RockNames == 0 then
+        return nil
+    end
     local Character = Players.LocalPlayer.Character
-    if not Character then return nil end
+    if not Character then
+        return nil
+    end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not RootPart then return nil end
+    if not RootPart then
+        return nil
+    end
     local IsAll = false
     for _, Name in ipairs(RockNames) do
         if Name == "All" then
@@ -237,11 +267,15 @@ end
 
 local function TweenToRock(Part)
     local Character = Players.LocalPlayer.Character
-    if not Character then return false end
+    if not Character then
+        return false
+    end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not (RootPart and Part and Part.Parent) then return false end
+    if not (RootPart and Part and Part.Parent) then
+        return false
+    end
 
-    local OffsetY = -(MineDistance or 3)
+    local OffsetY = - (MineDistance or 3)
     local TargetPos = Part.Position + Vector3.new(0, OffsetY, 0)
     local LookAt = Part.Position + Vector3.new(0, 5, 0)
 
@@ -266,7 +300,9 @@ local function MineRock(Part, RockName)
     if Part and RockName and RockName ~= "" then
         local Model = Part:FindFirstAncestorWhichIsA("Model")
         if Model and Model.Name == RockName then
-            local Args = {"Pickaxe"}
+            local Args = {
+                "Pickaxe"
+            }
             local ToolRemote = ReplicatedStorage.Shared.Packages.Knit.Services.ToolService.RF.ToolActivated
             local Character = Players.LocalPlayer.Character
             if Character then
@@ -285,7 +321,7 @@ local function MineRock(Part, RockName)
                     local Connection
                     Connection = RunService.Heartbeat:Connect(function()
                         if AutoMineEnabled and Model and Model.Parent and Players.LocalPlayer.Character == OriginalChar and RootPart and RootPart.Parent and not Tweening then
-                            local TargetY = -(MineDistance or 3)
+                            local TargetY = - (MineDistance or 3)
                             local TargetPos = Part.Position + Vector3.new(0, TargetY, 0)
                             local LookAt = Part.Position + Vector3.new(0, 5, 0)
                             RootPart.CFrame = CFrame.new(TargetPos, LookAt)
@@ -293,7 +329,9 @@ local function MineRock(Part, RockName)
                                 BodyVel.Velocity = Vector3.new(0, 0, 0)
                             end
                         else
-                            if Connection then Connection:Disconnect() end
+                            if Connection then
+                                Connection:Disconnect()
+                            end
                         end
                     end)
                     while AutoMineEnabled and Players.LocalPlayer.Character == OriginalChar and RootPart and RootPart.Parent and not Tweening and Model and Model.Parent do
@@ -302,8 +340,12 @@ local function MineRock(Part, RockName)
                         end)
                         task.wait(0.15)
                     end
-                    if Connection then Connection:Disconnect() end
-                    if BodyVel and BodyVel.Parent then BodyVel:Destroy() end
+                    if Connection then
+                        Connection:Disconnect()
+                    end
+                    if BodyVel and BodyVel.Parent then
+                        BodyVel:Destroy()
+                    end
                     if RootPart and RootPart.Parent then
                         RootPart.AssemblyAngularVelocity = OriginalAngular
                     end
@@ -316,7 +358,9 @@ end
 local function GetBaseMobName(MobName)
     if MobName and MobName ~= "" then
         local Base = MobName:gsub("%d+$", "")
-        if Base == "" then return nil end
+        if Base == "" then
+            return nil
+        end
         return Base:gsub("%s+$", "")
     end
     return nil
@@ -326,9 +370,13 @@ local function GetAllEnemyTypes()
     AllEnemyTypes = {}
     local Seen = {}
     local Assets = ReplicatedStorage:FindFirstChild("Assets")
-    if not Assets then return AllEnemyTypes end
+    if not Assets then
+        return AllEnemyTypes
+    end
     local Mobs = Assets:FindFirstChild("Mobs")
-    if not Mobs then return AllEnemyTypes end
+    if not Mobs then
+        return AllEnemyTypes
+    end
     for _, Desc in ipairs(Mobs:GetDescendants()) do
         if Desc:IsA("Model") and Desc.Name ~= "Model" then
             local BaseName = GetBaseMobName(Desc.Name)
@@ -344,9 +392,13 @@ end
 
 local function GetMobModels(MobBaseName)
     local Models = {}
-    if not MobBaseName or MobBaseName == "" then return Models end
+    if not MobBaseName or MobBaseName == "" then
+        return Models
+    end
     local Living = workspace:FindFirstChild("Living")
-    if not Living then return Models end
+    if not Living then
+        return Models
+    end
     for _, Child in ipairs(Living:GetChildren()) do
         if Child:IsA("Model") and GetBaseMobName(Child.Name) == MobBaseName then
             table.insert(Models, Child)
@@ -356,16 +408,22 @@ local function GetMobModels(MobBaseName)
 end
 
 local function IsMobDead(Mob)
-    if not (Mob and Mob.Parent) then return true end
+    if not (Mob and Mob.Parent) then
+        return true
+    end
     local Status = Mob:FindFirstChild("Status")
     return Status and Status:FindFirstChild("Dead") or false
 end
 
 local function GetClosestEnemy(EnemyBaseNames)
     local Character = Players.LocalPlayer.Character
-    if not Character then return nil end
+    if not Character then
+        return nil
+    end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not RootPart then return nil end
+    if not RootPart then
+        return nil
+    end
     local IsAll = false
     for _, Name in ipairs(EnemyBaseNames) do
         if Name == "All" then
@@ -402,13 +460,21 @@ end
 
 local function TweenToEnemy(Mob, OffsetY)
     local Character = Players.LocalPlayer.Character
-    if not Character then return false end
+    if not Character then
+        return false
+    end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not (RootPart and Mob and Mob.Parent) then return false end
+    if not (RootPart and Mob and Mob.Parent) then
+        return false
+    end
     local MobRoot = Mob:FindFirstChild("HumanoidRootPart") or Mob.PrimaryPart or Mob:FindFirstChildWhichIsA("BasePart", true)
-    if not MobRoot then return false end
+    if not MobRoot then
+        return false
+    end
     if CurrentEnemyTween then
-        pcall(function() CurrentEnemyTween:Cancel() end)
+        pcall(function()
+            CurrentEnemyTween:Cancel()
+        end)
     end
     local TargetPos = MobRoot.Position + Vector3.new(0, OffsetY, 0)
 
@@ -431,7 +497,9 @@ end
 local function FarmEnemy(Mob, MobBaseName)
     if Mob and MobBaseName and MobBaseName ~= "" then
         if Mob and Mob.Parent then
-            local Args = {"Weapon"}
+            local Args = {
+                "Weapon"
+            }
             local ToolRemote = ReplicatedStorage.Shared.Packages.Knit.Services.ToolService.RF.ToolActivated
             local Character = Players.LocalPlayer.Character
             if Character then
@@ -466,10 +534,14 @@ local function FarmEnemy(Mob, MobBaseName)
                                 if MobRoot and RootPart and RootPart.Parent then
                                     local TargetPos = MobRoot.Position + Vector3.new(0, FarmDistance, 0)
                                     RootPart.CFrame = CFrame.new(TargetPos, MobRoot.Position)
-                                    if BodyVel then BodyVel.Velocity = Vector3.new(0, 0, 0) end
+                                    if BodyVel then
+                                        BodyVel.Velocity = Vector3.new(0, 0, 0)
+                                    end
                                 end
                             else
-                                if Connection then Connection:Disconnect() end
+                                if Connection then
+                                    Connection:Disconnect()
+                                end
                             end
                         end
                     end)
@@ -480,11 +552,17 @@ local function FarmEnemy(Mob, MobBaseName)
                         task.wait(0.15)
                     end
                     if CurrentEnemyTween then
-                        pcall(function() CurrentEnemyTween:Cancel() end)
+                        pcall(function()
+                            CurrentEnemyTween:Cancel()
+                        end)
                         CurrentEnemyTween = nil
                     end
-                    if Connection then Connection:Disconnect() end
-                    if BodyVel and BodyVel.Parent then BodyVel:Destroy() end
+                    if Connection then
+                        Connection:Disconnect()
+                    end
+                    if BodyVel and BodyVel.Parent then
+                        BodyVel:Destroy()
+                    end
                     if RootPart and RootPart.Parent then
                         RootPart.AssemblyAngularVelocity = OriginalAngular
                     end
@@ -530,9 +608,13 @@ local function ensureWeaponEquipped()
         end
     end
     local backpack = LocalPlayer:FindFirstChild("Backpack")
-    if not backpack then return nil end
+    if not backpack then
+        return nil
+    end
     local weapon = backpack:FindFirstChild("Weapon")
-    if not (weapon and weapon:IsA("Tool")) then return nil end
+    if not (weapon and weapon:IsA("Tool")) then
+        return nil
+    end
     pcall(function()
         if hum then
             hum:EquipTool(weapon)
@@ -559,13 +641,17 @@ local function stopRunCharacter()
 end
 
 local function dashAwayFromTarget(humanoid, hrp, targetPart)
-    if not (humanoid and hrp and targetPart) then return end
+    if not (humanoid and hrp and targetPart) then
+        return
+    end
     pcall(function()
         local CharacterService = Knit.GetService("CharacterService")
         local toEnemy = (targetPart.Position - hrp.Position)
         local flat = Vector3.new(toEnemy.X, 0, toEnemy.Z)
-        if flat.Magnitude < 0.1 then return end
-        local away = -flat.Unit
+        if flat.Magnitude < 0.1 then
+            return
+        end
+        local away = - flat.Unit
         local rootCF = hrp.CFrame
         local look = rootCF.LookVector
         local right = rootCF.RightVector
@@ -601,7 +687,9 @@ local ShopDropdown = nil
 local function GetAllNPCs()
     AllNPCs = {}
     local Proximity = workspace:FindFirstChild("Proximity")
-    if not Proximity then return AllNPCs end
+    if not Proximity then
+        return AllNPCs
+    end
     for _, Child in ipairs(Proximity:GetChildren()) do
         if Child:IsA("Model") and not Child.Name:lower():find("potion") then
             table.insert(AllNPCs, Child.Name)
@@ -614,7 +702,9 @@ end
 local function GetAllShops()
     AllShops = {}
     local Shops = workspace:FindFirstChild("Shops")
-    if not Shops then return AllShops end
+    if not Shops then
+        return AllShops
+    end
     for _, Child in ipairs(Shops:GetChildren()) do
         if Child:IsA("Model") then
             table.insert(AllShops, Child.Name)
@@ -663,7 +753,9 @@ local function TweenToTarget(TargetName, IsNPC)
 end
 
 local function sendWebhookNotification(title, description, color, fields)
-    if not webhook.enabled or webhook.url == "" then return end
+    if not webhook.enabled or webhook.url == "" then
+        return
+    end
 
     local embed = {
         ["title"] = title,
@@ -677,7 +769,9 @@ local function sendWebhookNotification(title, description, color, fields)
     }
 
     local data = {
-        ["embeds"] = {embed}
+        ["embeds"] = {
+            embed
+        }
     }
 
     if webhook.userId ~= "" then
@@ -706,28 +800,44 @@ local function sendWebhookNotification(title, description, color, fields)
 end
 
 local function setupAutoParry(npcModel)
-    if not autoParry.enabled then return end
+    if not autoParry.enabled then
+        return
+    end
 
     task.spawn(function()
         local hrp = npcModel:WaitForChild("HumanoidRootPart", 5)
-        if not hrp then return end
+        if not hrp then
+            return
+        end
 
         local infoFrame = hrp:WaitForChild("infoFrame", 5)
-        if not infoFrame then return end
+        if not infoFrame then
+            return
+        end
 
         local frame = infoFrame:WaitForChild("Frame", 5)
-        if not frame then return end
+        if not frame then
+            return
+        end
 
         local rockName = frame:WaitForChild("rockName", 5)
-        if not rockName or not rockName:IsA("TextLabel") then return end
+        if not rockName or not rockName:IsA("TextLabel") then
+            return
+        end
 
-        if not string.find(rockName.Text, "Slime") then return end
+        if not string.find(rockName.Text, "Slime") then
+            return
+        end
 
         local status = npcModel:WaitForChild("Status", 5)
-        if not status then return end
+        if not status then
+            return
+        end
 
         status.ChildAdded:Connect(function(child)
-            if not autoParry.enabled then return end
+            if not autoParry.enabled then
+                return
+            end
 
             if child:IsA("BoolValue") and child.Name == "Attacking" then
                 task.wait(0.1)
@@ -748,7 +858,9 @@ end
 
 local function initializeAutoParry()
     local Living = workspace:FindFirstChild("Living")
-    if not Living then return end
+    if not Living then
+        return
+    end
 
     for _, npc in ipairs(Living:GetChildren()) do
         if npc:IsA("Model") then
@@ -764,254 +876,237 @@ local function initializeAutoParry()
 end
 
 local function getInventoryFromUI()
-				local inv = {}
-				local pg = LocalPlayer:FindFirstChild("PlayerGui")
-				if not pg then return inv end
-
-				local menu = pg:FindFirstChild("Menu")
-				local frame1 = menu and menu:FindFirstChild("Frame")
-				local frame2 = frame1 and frame1:FindFirstChild("Frame")
-				local menus = frame2 and frame2:FindFirstChild("Menus")
-				local stash = menus and menus:FindFirstChild("Stash")
-				local container = stash and stash:FindFirstChild("Background")
-
-				if not container then 
-								container = stash 
-				end
-
-				if not container then
-								return inv 
-				end
-
-				for _, itemFrame in ipairs(container:GetChildren()) do
-								local main = itemFrame:FindFirstChild("Main")
-								if main then
-												local nameLbl = main:FindFirstChild("ItemName")
-												local qtyLbl = main:FindFirstChild("Quantity")
-												if nameLbl and qtyLbl and nameLbl:IsA("TextLabel") and qtyLbl:IsA("TextLabel") then
-																local name = nameLbl.Text
-																local qtyStr = qtyLbl.Text
-																local qty = tonumber(qtyStr:match("%d+")) or 0
-																if name and name ~= "" and qty > 0 then
-																				inv[name] = qty
-																end
-												end
-								end
-				end
-
-				return inv
+    local inv = {}
+    local pg = LocalPlayer:FindFirstChild("PlayerGui")
+    if not pg then
+        return inv
+    end
+    local menu = pg:FindFirstChild("Menu")
+    local frame1 = menu and menu:FindFirstChild("Frame")
+    local frame2 = frame1 and frame1:FindFirstChild("Frame")
+    local menus = frame2 and frame2:FindFirstChild("Menus")
+    local stash = menus and menus:FindFirstChild("Stash")
+    local container = stash and stash:FindFirstChild("Background")
+    if not container then
+        container = stash
+    end
+    if not container then
+        return inv
+    end
+    for _, itemFrame in ipairs(container:GetChildren()) do
+        local main = itemFrame:FindFirstChild("Main")
+        if main then
+            local nameLbl = main:FindFirstChild("ItemName")
+            local qtyLbl = main:FindFirstChild("Quantity")
+            if nameLbl and qtyLbl and nameLbl:IsA("TextLabel") and qtyLbl:IsA("TextLabel") then
+                local name = nameLbl.Text
+                local qtyStr = qtyLbl.Text
+                local qty = tonumber(qtyStr:match("%d+")) or 0
+                if name and name ~= "" and qty > 0 then
+                    inv[name] = qty
+                end
+            end
+        end
+    end
+    return inv
 end
 
 local function startAutoMelt()
-				task.spawn(function()
-								while autoForge.autoMelt and autoForge.enabled do
-												local visible = MeltMinigame and MeltMinigame.Enabled
-												if visible then
-																local frame = MeltMinigame:FindFirstChild("Frame")
-																local bar = frame and frame:FindFirstChild("Bar")
-																local indicator = bar and bar:FindFirstChild("Indicator")
-																local button = bar and bar:FindFirstChild("TextButton")
+    task.spawn(function()
+        while autoForge.autoMelt and autoForge.enabled do
+            local visible = MeltMinigame and MeltMinigame.Enabled
+            if visible then
+                local frame = MeltMinigame:FindFirstChild("Frame")
+                local bar = frame and frame:FindFirstChild("Bar")
+                local indicator = bar and bar:FindFirstChild("Indicator")
+                local button = bar and bar:FindFirstChild("TextButton")
+                if indicator and button then
+                    local pos = indicator.Position.X.Scale
+                    local speed = 15
 
-																if indicator and button then
-																				local pos = indicator.Position.X.Scale
-																				local speed = 15
-
-																				-- Click when indicator is in optimal range (45-55%)
-																				if pos >= 0.45 and pos <= 0.55 then
-																								pcall(function()
-																												for i = 1, speed do
-																																button.MouseButton1Click:Fire()
-																												end
-																								end)
-																				end
-																end
-												end
-												task.wait(0.01)
-								end
-				end)
+                    if pos >= 0.45 and pos <= 0.55 then
+                        pcall(function()
+                            for i = 1, speed do
+                                button.MouseButton1Click:Fire()
+                            end
+                        end)
+                    end
+                end
+            end
+            task.wait(0.01)
+        end
+    end)
 end
 
--- Auto Pour Function
 local function startAutoPour()
-				task.spawn(function()
-								while autoForge.autoPour and autoForge.enabled do
-												local visible = PourMinigame and PourMinigame.Enabled
-												if visible then
-																local frame = PourMinigame:FindFirstChild("Frame")
-																local container = frame and frame:FindFirstChild("Container")
-																local indicator = container and container:FindFirstChild("Indicator")
-
-																if indicator then
-																				local pos = indicator.Position.Y.Scale
-																				local min = 0.05
-																				local max = 0.9
-
-																				pcall(function()
-																								if pos < min then
-																												StartBlock:InvokeServer()
-																								elseif pos > max then
-																												StopBlock:InvokeServer()
-																								end
-																				end)
-																end
-												end
-												task.wait(0.01)
-								end
-				end)
+    task.spawn(function()
+        while autoForge.autoPour and autoForge.enabled do
+            local visible = PourMinigame and PourMinigame.Enabled
+            if visible then
+                local frame = PourMinigame:FindFirstChild("Frame")
+                local container = frame and frame:FindFirstChild("Container")
+                local indicator = container and container:FindFirstChild("Indicator")
+                if indicator then
+                    local pos = indicator.Position.Y.Scale
+                    local min = 0.05
+                    local max = 0.9
+                    pcall(function()
+                        if pos < min then
+                            StartBlock:InvokeServer()
+                        elseif pos > max then
+                            StopBlock:InvokeServer()
+                        end
+                    end)
+                end
+            end
+            task.wait(0.01)
+        end
+    end)
 end
 
--- Auto Hammer Function
 local function startAutoHammer()
-				task.spawn(function()
-								while autoForge.autoHammer and autoForge.enabled do
-												local visible = HammerMinigame and HammerMinigame.Enabled
-												if visible then
-																local frame = HammerMinigame:FindFirstChild("Frame")
-																local bar = frame and frame:FindFirstChild("Bar")
-																local indicator = bar and bar:FindFirstChild("Indicator")
-																local button = bar and bar:FindFirstChild("TextButton")
+    task.spawn(function()
+        while autoForge.autoHammer and autoForge.enabled do
+            local visible = HammerMinigame and HammerMinigame.Enabled
+            if visible then
+                local frame = HammerMinigame:FindFirstChild("Frame")
+                local bar = frame and frame:FindFirstChild("Bar")
+                local indicator = bar and bar:FindFirstChild("Indicator")
+                local button = bar and bar:FindFirstChild("TextButton")
+                if indicator and button then
+                    local pos = indicator.Position.X.Scale
 
-																if indicator and button then
-																				local pos = indicator.Position.X.Scale
-
-																				-- Click when indicator is in optimal range (45-55%)
-																				if pos >= 0.45 and pos <= 0.55 then
-																								pcall(function()
-																												button.MouseButton1Click:Fire()
-																								end)
-																				end
-																end
-												end
-												task.wait(0.01)
-								end
-				end)
+                    if pos >= 0.45 and pos <= 0.55 then
+                        pcall(function()
+                            button.MouseButton1Click:Fire()
+                        end)
+                    end
+                end
+            end
+            task.wait(0.01)
+        end
+    end)
 end
 
--- Auto Mold Function
 local function startAutoMold()
-				task.spawn(function()
-								while autoForge.autoMold and autoForge.enabled do
-												local char = LocalPlayer.Character
-												if char then
-																local hrp = char:FindFirstChild("HumanoidRootPart")
-																if hrp then
-																				local proximity = workspace:FindFirstChild("Proximity")
-																				if proximity then
-																								local mold = proximity:FindFirstChild("Mold")
-																								if mold then
-																												local moldRoot = mold:FindFirstChild("HumanoidRootPart") or mold.PrimaryPart
-																												if moldRoot then
-																																local dist = (hrp.Position - moldRoot.Position).Magnitude
-																																if dist < 10 then
-																																				pcall(function()
-																																								Dialogue:InvokeServer("Mold", {ItemType = autoForge.itemType})
-																																				end)
-																																end
-																												end
-																								end
-																				end
-																end
-												end
-												task.wait(1)
-								end
-				end)
+    task.spawn(function()
+        while autoForge.autoMold and autoForge.enabled do
+            local char = LocalPlayer.Character
+            if char then
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local proximity = workspace:FindFirstChild("Proximity")
+                    if proximity then
+                        local mold = proximity:FindFirstChild("Mold")
+                        if mold then
+                            local moldRoot = mold:FindFirstChild("HumanoidRootPart") or mold.PrimaryPart
+                            if moldRoot then
+                                local dist = (hrp.Position - moldRoot.Position).Magnitude
+                                if dist < 10 then
+                                    pcall(function()
+                                        Dialogue:InvokeServer("Mold", {
+                                            ItemType = autoForge.itemType
+                                        })
+                                    end)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            task.wait(1)
+        end
+    end)
 end
 
--- Main Auto Forge Function
 local function startAutoForge()
-				task.spawn(function()
-								while autoForge.enabled do
-												if #autoForge.selectedOres > 0 then
-																local inv = getInventoryFromUI()
-																local hasOres = false
+    task.spawn(function()
+        while autoForge.enabled do
+            if # autoForge.selectedOres > 0 then
+                local inv = getInventoryFromUI()
+                local hasOres = false
 
-																-- Check if we have enough ores
-																for _, oreName in ipairs(autoForge.selectedOres) do
-																				if inv[oreName] and inv[oreName] >= autoForge.totalOresPerForge then
-																								hasOres = true
-																								break
-																				end
-																end
-
-																if hasOres then
-																				pcall(function()
+                for _, oreName in ipairs(autoForge.selectedOres) do
+                    if inv[oreName] and inv[oreName] >= autoForge.totalOresPerForge then
+                        hasOres = true
+                        break
+                    end
+                end
+                if hasOres then
+                    pcall(function()
 																								-- Create ore basket
-																								local oreBasket = {}
-																								for _, oreName in ipairs(autoForge.selectedOres) do
-																												if inv[oreName] then
-																																oreBasket[oreName] = math.min(inv[oreName], autoForge.totalOresPerForge)
-																												end
-																								end
+                        local oreBasket = {}
+                        for _, oreName in ipairs(autoForge.selectedOres) do
+                            if inv[oreName] then
+                                oreBasket[oreName] = math.min(inv[oreName], autoForge.totalOresPerForge)
+                            end
+                        end
 
 																								-- Use the ores
-																								UseItems:InvokeServer(oreBasket)
-																				end)
-																end
-												end
-
-												task.wait(2)
-								end
-				end)
+                        UseItems:InvokeServer(oreBasket)
+                    end)
+                end
+            end
+            task.wait(2)
+        end
+    end)
 end
 
--- Function to build ore options for dropdown
 local function buildForgeOreOptions()
-				local names = {}
-				local assets = ReplicatedStorage:FindFirstChild("Assets")
-				local oresFolder = assets and assets:FindFirstChild("Ores")
-
-				if oresFolder then
-								for _, ore in ipairs(oresFolder:GetChildren()) do
-												if ore.Name and ore.Name ~= "" then
-																table.insert(names, ore.Name)
-												end
-								end
-				end
-
-				table.sort(names)
-				return names
+    local names = {}
+    local assets = ReplicatedStorage:FindFirstChild("Assets")
+    local oresFolder = assets and assets:FindFirstChild("Ores")
+    if oresFolder then
+        for _, ore in ipairs(oresFolder:GetChildren()) do
+            if ore.Name and ore.Name ~= "" then
+                table.insert(names, ore.Name)
+            end
+        end
+    end
+    table.sort(names)
+    return names
 end
 
--- Initialize selected ores with first ore if none selected
 local forgeOreOptions = buildForgeOreOptions()
-if #autoForge.selectedOres == 0 and #forgeOreOptions > 0 then
-				autoForge.selectedOres = { forgeOreOptions[1] }
+if # autoForge.selectedOres == 0 and # forgeOreOptions > 0 then
+    autoForge.selectedOres = {
+        forgeOreOptions[1]
+    }
 end
 
--- Enable/Disable Functions
 function enableAutoMelt(enabled)
-				autoForge.autoMelt = enabled
-				if enabled then
-								startAutoMelt()
-				end
+    autoForge.autoMelt = enabled
+    if enabled then
+        startAutoMelt()
+    end
 end
 
 function enableAutoPour(enabled)
-				autoForge.autoPour = enabled
-				if enabled then
-								startAutoPour()
-				end
+    autoForge.autoPour = enabled
+    if enabled then
+        startAutoPour()
+    end
 end
 
 function enableAutoHammer(enabled)
-				autoForge.autoHammer = enabled
-				if enabled then
-								startAutoHammer()
-				end
+    autoForge.autoHammer = enabled
+    if enabled then
+        startAutoHammer()
+    end
 end
 
 function enableAutoMold(enabled)
-				autoForge.autoMold = enabled
-				if enabled then
-								startAutoMold()
-				end
+    autoForge.autoMold = enabled
+    if enabled then
+        startAutoMold()
+    end
 end
 
 function enableAutoForge(enabled)
-				autoForge.enabled = enabled
-				if enabled then
-								startAutoForge()
-				end
+    autoForge.enabled = enabled
+    if enabled then
+        startAutoForge()
+    end
 end
 
 local AIKO = loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/src/Library.lua"))()
@@ -1023,13 +1118,31 @@ local Window = AIKO:Window({
 })
 
 local Tabs = {
-    Info = Window:AddTab({ Name = "Home", Icon = "home" }),
-    MainFarm = Window:AddTab({ Name = "Main", Icon = "sword" }),
+    Info = Window:AddTab({
+        Name = "Home",
+        Icon = "home"
+    }),
+    MainFarm = Window:AddTab({
+        Name = "Main",
+        Icon = "sword"
+    }),
     --AutoForge = Window:AddTab({ Name = "Forge", Icon = "hammer" }),
-    Auto = Window:AddTab({ Name = "Auto", Icon = "loop" }),
-    AutoSell = Window:AddTab({ Name = "Sell", Icon = "shop" }),
-    Webhook = Window:AddTab({ Name = "Webhook", Icon = "bell" }),
-    Teleport = Window:AddTab({ Name = "Teleport", Icon = "map-pin" }),
+    Auto = Window:AddTab({
+        Name = "Auto",
+        Icon = "loop"
+    }),
+    AutoSell = Window:AddTab({
+        Name = "Sell",
+        Icon = "shop"
+    }),
+    Webhook = Window:AddTab({
+        Name = "Webhook",
+        Icon = "bell"
+    }),
+    Teleport = Window:AddTab({
+        Name = "Teleport",
+        Icon = "map-pin"
+    }),
 }
 
 local InfoSection = Tabs.Info:AddSection("Support", true)
@@ -1079,14 +1192,20 @@ SettingsSection:AddSlider({
     Default = 60,
     Callback = function(v)
         local n = tonumber(v)
-        if n and n >= 10 then antiAfk.interval = n end
+        if n and n >= 10 then
+            antiAfk.interval = n
+        end
     end
 })
 
-if antiAfk.enabled then AA_Start() end
+if antiAfk.enabled then
+    AA_Start()
+end
 
 AllRockTypes = GetAllRockTypes()
-local RockOptions = {"All"}
+local RockOptions = {
+    "All"
+}
 for _, Rock in ipairs(AllRockTypes) do
     table.insert(RockOptions, Rock)
 end
@@ -1132,7 +1251,9 @@ OreFarmSection:AddButton({
     Title = "Refresh Rock List",
     Callback = function()
         AllRockTypes = GetAllRockTypes()
-        local NewOptions = {"All"}
+        local NewOptions = {
+            "All"
+        }
         for _, Rock in ipairs(AllRockTypes) do
             table.insert(NewOptions, Rock)
         end
@@ -1184,7 +1305,7 @@ OreFarmSection:AddToggle({
     Default = false,
     Callback = function(v)
         AutoMineEnabled = v
-        if v and (not RockTypes or #RockTypes == 0) then
+        if v and (not RockTypes or # RockTypes == 0) then
             aiko("Please select a rock type!")
         elseif v then
             aiko("Auto mine started!")
@@ -1196,7 +1317,7 @@ OreFarmSection:AddToggle({
 
 task.spawn(function()
     while task.wait(0.3) do
-        if AutoMineEnabled and RockTypes and #RockTypes > 0 and not Tweening then
+        if AutoMineEnabled and RockTypes and # RockTypes > 0 and not Tweening then
             local Character = Players.LocalPlayer.Character
             local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
             local ClosestRockPart = Character and RootPart and GetClosestRock(RockTypes)
@@ -1210,7 +1331,9 @@ task.spawn(function()
 end)
 
 AllEnemyTypes = GetAllEnemyTypes()
-local EnemyOptions = {"All"}
+local EnemyOptions = {
+    "All"
+}
 for _, Enemy in ipairs(AllEnemyTypes) do
     table.insert(EnemyOptions, Enemy)
 end
@@ -1248,7 +1371,9 @@ MobFarmSection:AddButton({
     Title = "Refresh Enemy List",
     Callback = function()
         AllEnemyTypes = GetAllEnemyTypes()
-        local NewOptions = {"All"}
+        local NewOptions = {
+            "All"
+        }
         for _, Enemy in ipairs(AllEnemyTypes) do
             table.insert(NewOptions, Enemy)
         end
@@ -1300,7 +1425,7 @@ MobFarmSection:AddToggle({
     Default = false,
     Callback = function(v)
         AutoFarmEnemyEnabled = v
-        if v and (not EnemyTypes or #EnemyTypes == 0) then
+        if v and (not EnemyTypes or # EnemyTypes == 0) then
             aiko("Please select an enemy type!")
         elseif v then
             aiko("Auto farm mobs started!")
@@ -1312,7 +1437,7 @@ MobFarmSection:AddToggle({
 
 task.spawn(function()
     while task.wait(0.3) do
-        if AutoFarmEnemyEnabled and EnemyTypes and #EnemyTypes > 0 and not Tweening then
+        if AutoFarmEnemyEnabled and EnemyTypes and # EnemyTypes > 0 and not Tweening then
             local ClosestEnemy = GetClosestEnemy(EnemyTypes)
             if ClosestEnemy then
                 if IsMobDead(ClosestEnemy) then
@@ -1329,122 +1454,10 @@ task.spawn(function()
     end
 end)
 
---[[local ForgeSection = Tabs.AutoForge:AddSection("Auto Forge")
-
-ForgeSection:AddDropdown({
-    Title = "Item Type",
-    Content = "Weapon or Armor",
-    Options = { "Weapon", "Armor" },
-    Default = "Weapon",
-    Callback = function(v)
-        if v == "Weapon" or v == "Armor" then
-            autoForge.itemType = v
-        end
-    end
-})
-
-ForgeSection:AddDropdown({
-    Title = "Select Ore",
-    Multi = true,
-    Options = forgeOreOptions,
-    Default = autoForge.selectedOres,
-    Callback = function(opts)
-        if type(opts) == "table" and #opts > 0 then
-            autoForge.selectedOres = opts
-        end
-    end
-})
-
-ForgeSection:AddSlider({
-    Title = "Ores Per Forge",
-    Content = "Number of ores to use",
-    Min = 3,
-    Max = 10,
-    Increment = 1,
-    Default = 3,
-    Callback = function(value)
-        autoForge.totalOresPerForge = math.floor(value)
-    end
-})
-
-local MinigameSection = Tabs.AutoForge:AddSection("Minigame Automation")
-
-MinigameSection:AddToggle({
-    Title = "Auto Melt",
-    Default = false,
-    Callback = function(v)
-        autoForge.autoMelt = v
-        if v then
-            startAutoMelt()
-            aiko("Auto melt enabled!")
-        else
-            aiko("Auto melt disabled")
-        end
-    end
-})
-
-MinigameSection:AddToggle({
-    Title = "Auto Pour",
-    Default = false,
-    Callback = function(v)
-        autoForge.autoPour = v
-        if v then
-            startAutoPour()
-            aiko("Auto pour enabled!")
-        else
-            aiko("Auto pour disabled")
-        end
-    end
-})
-
-MinigameSection:AddToggle({
-    Title = "Auto Hammer",
-    Default = false,
-    Callback = function(v)
-        autoForge.autoHammer = v
-        if v then
-            startAutoHammer()
-            aiko("Auto hammer enabled!")
-        else
-            aiko("Auto hammer disabled")
-        end
-    end
-})
-
-MinigameSection:AddToggle({
-    Title = "Auto Mold",
-    Default = false,
-    Callback = function(v)
-        autoForge.autoMold = v
-        if v then
-            startAutoMold()
-            aiko("Auto mold enabled!")
-        else
-            aiko("Auto mold disabled")
-        end
-    end
-})
-
-ForgeSection:AddDivider()
-
-ForgeSection:AddToggle({
-    Title = "Enable Auto Forge",
-    Default = false,
-    Callback = function(v)
-        autoForge.enabled = v
-        if v then
-            aiko("Auto forge started!")
-            startAutoForge()
-        else
-            aiko("Auto forge stopped")
-        end
-    end
-})]]
-
 local oreOptions = buildOreOptions()
 
 local mobOptions = buildMobOptions()
-if #mobOptions == 0 then
+if # mobOptions == 0 then
     table.insert(mobOptions, "Zombie")
 end
 
@@ -1474,7 +1487,7 @@ AutoPotSection:AddDropdown({
     Options = potionOptions,
     Default = {},
     Callback = function(opts)
-        if type(opts) == "table" and #opts > 0 then
+        if type(opts) == "table" and # opts > 0 then
             autoPotions.selected = opts
         else
             autoPotions.selected = {}
@@ -1493,7 +1506,7 @@ local function autoPotionLoop()
         :WaitForChild("ToolActivated")
 
     while autoPotions.enabled do
-        if #autoPotions.selected == 0 then
+        if # autoPotions.selected == 0 then
             wait(1)
         else
             local usedSomething = false
@@ -1532,7 +1545,9 @@ AutoPotSection:AddToggle({
 local AutoMoveSection = Tabs.Auto:AddSection("Auto Movement")
 
 local function autoMovementLoop()
-    if autoMovementRunning then return end
+    if autoMovementRunning then
+        return
+    end
     autoMovementRunning = true
     local lastHealth
     local lastDodgeTime = 0
@@ -1638,8 +1653,10 @@ local function RefreshInventoryList()
     end
     table.sort(options)
 
-    if #options == 0 then
-        options = {"No items found (Open Stash)"}
+    if # options == 0 then
+        options = {
+            "No items found (Open Stash)"
+        }
     end
 
     currentInvOptions = options
@@ -1647,7 +1664,7 @@ local function RefreshInventoryList()
     if InvDropdown then
         InvDropdown:SetValues(currentInvOptions, {})
     end
-    aiko("Refreshed inventory: " .. #options .. " items")
+    aiko("Refreshed inventory: " .. # options .. " items")
 end
 
 local function performAutoSell()
@@ -1659,11 +1676,17 @@ local function performAutoSell()
     local invSet = listToSet(autoSell.selectedInvItems)
 
     local function isSelected(name)
-        if selectedSet[name] then return true end
-        if invSet[name] then return true end
+        if selectedSet[name] then
+            return true
+        end
+        if invSet[name] then
+            return true
+        end
         if selectedSet["Any"] then
             for _, v in ipairs(oreOptions) do
-                if v == name then return true end
+                if v == name then
+                    return true
+                end
             end
         end
         return false
@@ -1834,18 +1857,13 @@ WebhookSection:AddButton({
             aiko("Please set webhook URL first!")
             return
         end
-        sendWebhookNotification(
-            "🔔 Test Notification",
-            "Webhook is working correctly!",
-            3447003,
+        sendWebhookNotification("ð Test Notification", "Webhook is working correctly!", 3447003, {
             {
-                {
-                    ["name"] = "Status",
-                    ["value"] = "Connected",
-                    ["inline"] = true
-                }
+                ["name"] = "Status",
+                ["value"] = "Connected",
+                ["inline"] = true
             }
-        )
+        })
         aiko("Test notification sent!")
     end
 })
