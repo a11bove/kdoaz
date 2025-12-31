@@ -903,17 +903,6 @@ TeleportInfo:AddParagraph({
 
 local OreFarmSection = Tabs.MainFarm:AddSection("Ore Farming")
 
-OreFarmSection:AddSlider({
-    Title = "Teleport Speed",
-    Min = 30,
-    Max = 200,
-    Increment = 10,
-    Default = 70,
-    Callback = function(value)
-        MineTweenSpeed = value
-    end
-})
-
 RockDropdown = OreFarmSection:AddDropdown({
     Title = "Select Rock",
     Content = "Select rocks to mine",
@@ -968,9 +957,19 @@ OreFarmSection:AddSlider({
     end
 })
 
+OreFarmSection:AddSlider({
+    Title = "Teleport Speed",
+    Min = 30,
+    Max = 200,
+    Increment = 10,
+    Default = 70,
+    Callback = function(value)
+        MineTweenSpeed = value
+    end
+})
+
 OreFarmSection:AddToggle({
     Title = "Use Instant TP",
-    Content = "Instantly teleport instead of tweening",
     Default = false,
     Callback = function(v)
         UseInstantTPMine = v
@@ -1020,17 +1019,6 @@ end
 
 local MobFarmSection = Tabs.MainFarm:AddSection("Mob Farming")
 
-MobFarmSection:AddSlider({
-    Title = "Teleport Speed",
-    Min = 30,
-    Max = 200,
-    Increment = 10,
-    Default = 70,
-    Callback = function(value)
-        FarmTweenSpeed = value
-    end
-})
-
 EnemyDropdown = MobFarmSection:AddDropdown({
     Title = "Select Enemy",
     Content = "Select mobs to farm",
@@ -1070,6 +1058,17 @@ MobFarmSection:AddButton({
             EnemyDropdown:SetValues(NewOptions, EnemyTypes)
         end
         aiko("Enemy list refreshed!")
+    end
+})
+
+MobFarmSection:AddSlider({
+    Title = "Teleport Speed",
+    Min = 30,
+    Max = 200,
+    Increment = 10,
+    Default = 70,
+    Callback = function(value)
+        FarmTweenSpeed = value
     end
 })
 
@@ -1449,7 +1448,7 @@ local function performAutoSell()
     end
 end
 
-AutoSellSection({
+AutoSellSection:AddParagraph({
     Title = "Auto Sell Info",
     Icon = "info",
     Content = "You need to interact with Greedy Cey first to work."
