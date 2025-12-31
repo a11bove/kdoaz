@@ -13,6 +13,7 @@ local Knit = require(Shared:WaitForChild("Packages").Knit)
 local Utils = require(Shared:WaitForChild("Utils"))
 local Ore = require(Shared:WaitForChild("Data"):WaitForChild("Ore"))
 
+local Services = ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Packages"):WaitForChild("Knit"):WaitForChild("Services")
 local ToolService = Services:WaitForChild("ToolService")
 local ToolServiceRF = ToolService:WaitForChild("RF")
 local StartBlock = ToolServiceRF:WaitForChild("StartBlock")
