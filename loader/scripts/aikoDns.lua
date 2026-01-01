@@ -106,7 +106,7 @@ local function duplicateCash(state)
     if state then
         task.spawn(function()
             while duplicateCashActive do
-                for i = 1, 600 do
+                for i = 1, 5000 do
                     pcall(function()
                         RecieveCash:FireServer({
                             Value = 100,
