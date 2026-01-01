@@ -16,6 +16,7 @@ local Character = player.Character or player.CharacterAdded:Wait()
 
 local autoKM_Running = false
 local dupe_Running = false
+local duplicateCashActive = false
 
 local function autoFarmKm(state)
     autoKM_Running = state
@@ -98,6 +99,27 @@ local function duplicateCoin(state)
     end
 end
 
+local function duplicateCash(state)
+    duplicateCashActive = state
+    local RecieveCash = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("RecieveCash")
+
+    if state then
+        task.spawn(function()
+            while duplicateCashActive do
+                for i = 1, 500 do
+                    pcall(function()
+                        RecieveCash:FireServer({
+                            Value = 100,
+                            Password = 93828272827
+                        })
+                    end)
+                end
+                task.wait(0.3)
+            end
+        end)
+    end
+end
+
 local BoostPower = 0
 local BoostEnabled = false
 local BoostConnection = nil
@@ -155,7 +177,7 @@ local expsec = main:AddSection("Exploit")
 
 expsec:AddParagraph({
     Title = "Tip:",
-    Content = "Sobrahan niyo ng sukli para dalawang beses mag duplicate yung coins."
+    Content = "Sobrahan niyo ng sukli para dalawang beses mag duplicate."
 })
 
 expsec:AddToggle({
@@ -164,6 +186,14 @@ expsec:AddToggle({
     Default = false,
     Callback = function(value)
         duplicateCoin(value)
+    end
+})
+
+expsec:AddToggle({
+    Title = "Manual Duplicate Cash",
+    Default = false,
+    Callback = function(value)
+        duplicateCashActive(value)
     end
 })
 
