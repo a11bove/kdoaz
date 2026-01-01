@@ -2491,9 +2491,9 @@ local fishrad = radsr:AddToggle({
     end
 })
 
-local AIKO:MakeNotify({
+AIKO:MakeNotify({
     Title = "@aikoware",
     Description = "Script Loaded",
     Content = "Game: Fish It",
-    Delay = 4,
+    Delay = 4
 })
