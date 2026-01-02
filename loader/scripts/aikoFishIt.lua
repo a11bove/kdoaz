@@ -1,8 +1,8 @@
 local AIKO = loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/src/Library.lua"))()
 
 local Window = AIKO:Window({
-    Title   = "@aikoware |",
-    Footer  = "made by untog",              
+    Title   = "Aikoware |",
+    Footer  = "made by @aoki!",              
     Version = 1,
 })
 
@@ -132,13 +132,14 @@ local dcsec = Home:AddSection("Support", true)
 
 dcsec:AddParagraph({
     Title = "Discord",
-    Content = "Join our discord for more info!",
+    Content = "Join our discord for more information.",
     Icon = "discord",
     ButtonText = "Copy Server Link",
     ButtonCallback = function()
         local link = "https://discord.gg/JccfFGpDNV"
         if setclipboard then
             setclipboard(link)
+            aiko("Successfully Copied!")
         end
     end
 })
@@ -146,7 +147,7 @@ dcsec:AddParagraph({
 local srv = Home:AddSection("Server")
 
 local antiIDLE = srv:AddToggle({
-    Title = "Anti Afk",
+    Title = "Anti AFK",
     Content = "Anti kick when idle for 20 mins.",
     Default = false,
     Callback = function(enabled)
@@ -341,7 +342,7 @@ fsh:AddButton({
         StartLegitFishing(false)
 
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Manual Fix Stuck",
             Content = "Stuck Fixed",
             Delay = 2
@@ -573,7 +574,7 @@ bts:AddButton({
     Callback = function()
         RecoveryFishing()
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Manual Fix",
             Content = "Stuck Fixed",
             Delay = 2
@@ -793,14 +794,14 @@ rds:AddButton({
 
             if success then
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Rod Purchase", 
                     Content = "Purchased " .. selectedRod, 
                     Delay = 3
                 })
             else
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Rod Purchase Error", 
                     Content = tostring(err), 
                     Delay = 5
@@ -808,7 +809,7 @@ rds:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error", 
                 Content = "Invalid rod selection", 
                 Delay = 3
@@ -883,14 +884,14 @@ bs:AddButton({
 
             if success then
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Bait Purchase",
                     Content = "Purchased " .. selectedBait,
                     Delay = 3
                 })
             else
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Bait Purchase Error",
                     Content = tostring(err),
                     Delay = 5
@@ -898,7 +899,7 @@ bs:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "Invalid bait selection",
                 Delay = 3
@@ -989,14 +990,14 @@ bos:AddButton({
 
             if success then
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Boat Purchase",
                     Content = "Purchased " .. selectedBoat,
                     Delay = 3
                 })
             else
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Boat Purchase Error",
                     Content = tostring(err),
                     Delay = 5
@@ -1004,7 +1005,7 @@ bos:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "Invalid boat selection",
                 Delay = 3
@@ -1394,7 +1395,7 @@ fav:AddButton({
         _G.AutoFavoriteRarities = {}
         GlobalFav.SelectedRarities = {}
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Cleared",
             Content = "Rarity selection cleared",
             Delay = 2
@@ -1408,7 +1409,7 @@ fav:AddButton({
     Callback = function()
         GlobalFav.SelectedVariants = {}
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Cleared",
             Content = "Variant selection cleared",
             Delay = 2
@@ -1453,7 +1454,7 @@ loc:AddButton({
             if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(TeleportData.Locations[selectedLocation])
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Teleported",
                     Content = "Teleported to " .. selectedLocation,
                     Delay = 3
@@ -1461,7 +1462,7 @@ loc:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "No location selected",
                 Delay = 3
@@ -1507,7 +1508,7 @@ npcl:AddButton({
             if character and character:FindFirstChild("HumanoidRootPart") then
                 character:PivotTo(targetCFrame)
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Teleported",
                     Content = "Teleported to " .. selectedNPC,
                     Delay = 3
@@ -1515,7 +1516,7 @@ npcl:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "No NPC selected",
                 Delay = 3
@@ -1561,7 +1562,7 @@ mach:AddButton({
             if character and character:FindFirstChild("HumanoidRootPart") then
                 character:PivotTo(targetCFrame)
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Teleported",
                     Content = "Teleported to " .. selectedMachine,
                     Delay = 3
@@ -1569,7 +1570,7 @@ mach:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "No machine selected",
                 Delay = 3
@@ -1899,7 +1900,7 @@ evt:AddButton({
         priorityEventDropdown:Refresh(events)
         selectedEventsDropdown:Refresh(events)
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Event List",
             Content = "Refreshed! Found " .. #events .. " events",
             Delay = 3
@@ -1918,7 +1919,7 @@ evt:AddButton({
                     local offset = EventSettings.offsets[EventSettings.priorityEvent] or 7
                     hrp.CFrame = eventPart.CFrame + Vector3.new(0, offset, 0)
                     AIKO:MakeNotify({
-                        Title = "@aikoware",
+                        Title = "Aikoware",
                         Description = "| Teleported",
                         Content = "Teleported to " .. EventSettings.priorityEvent,
                         Delay = 3
@@ -1926,7 +1927,7 @@ evt:AddButton({
                 end
             else
                 AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Error",
                     Content = "Event not found or not active",
                     Delay = 3
@@ -1934,7 +1935,7 @@ evt:AddButton({
             end
         else
             AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "No priority event selected",
                 Delay = 3
@@ -1978,14 +1979,14 @@ ply:AddButton({
             if hrp and targetHRP then
                 hrp.CFrame = targetHRP.CFrame + Vector3.new(0,5,0)
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Teleported", 
                     Content = "Teleported to " .. selectedPlayer, 
                     Delay = 3
                 })
             else
                     AIKO:MakeNotify({
-                    Title = "@aikoware",
+                    Title = "Aikoware",
                     Description = "| Error", 
                     Content = "Player not found or not loaded", 
                     Delay = 3
@@ -1993,7 +1994,7 @@ ply:AddButton({
             end
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error", 
                 Content = "No player selected", 
                 Delay = 3
@@ -2008,7 +2009,7 @@ ply:AddButton({
     Callback = function()
         playerDropdown:Refresh(TeleportData.GetPlayerNames(Players, LocalPlayer))
             AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "Refreshed", 
             Content = "Player list updated", 
             Delay = 3
@@ -2048,7 +2049,7 @@ autotrade:AddButton({
             Trade.SendTradeRequest(selectedTradePlayer)
         else
                 AIKO:MakeNotify({
-                Title = "@aikoware",
+                Title = "Aikoware",
                 Description = "| Error",
                 Content = "No player selected",
                 Delay = 3
@@ -2073,7 +2074,7 @@ autotrade:AddButton({
     Callback = function()
         tradePlayerDropdown:Refresh(Trade.GetPlayerNames())
             AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Refreshed", 
             Content = "Player list updated", 
             Delay = 3
@@ -2129,7 +2130,7 @@ webhookSection:AddButton({
     Callback = function()
         local success, message = WebhookModule.SendTestWebhook()
         AIKO:MakeNotify({
-            Title = "@aikoware",
+            Title = "Aikoware",
             Description = "| Test Webhook",
             Content = message,
             Delay = 3
@@ -2380,8 +2381,8 @@ local fishrad = radsr:AddToggle({
 })
 
 AIKO:MakeNotify({
-    Title = "@aikoware",
+    Title = "Aikoware",
     Description = "Script Loaded",
     Content = "Game: Fish It",
-    Delay = 3
+    Delay = 5
 })
