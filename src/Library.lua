@@ -285,7 +285,7 @@ end
 local AIKO = {}
 function AIKO:MakeNotify(NotifyConfig)
     local NotifyConfig = NotifyConfig or {}
-    NotifyConfig.Title = NotifyConfig.Title or "@aikoware"
+    NotifyConfig.Title = NotifyConfig.Title or "Aikoware"
     NotifyConfig.Description = NotifyConfig.Description or "Notification"
     NotifyConfig.Content = NotifyConfig.Content or "Content"
     NotifyConfig.Color = NotifyConfig.Color or Color3.fromRGB(255, 0, 255)
@@ -483,7 +483,7 @@ end
 
 function aiko(msg, delay, color, title, desc)
     return AIKO:MakeNotify({
-        Title = title or "@aikoware",
+        Title = title or "Aikoware",
         Description = desc or "Notification",
         Content = msg or "Content",
         Color = color or Color3.fromRGB(255, 0, 255),
@@ -493,8 +493,8 @@ end
 
 function AIKO:Window(GuiConfig)
     GuiConfig = GuiConfig or {}
-    GuiConfig.Title = GuiConfig.Title or "@aikoware"
-    GuiConfig.Footer = GuiConfig.Footer or "made by untog!"
+    GuiConfig.Title = GuiConfig.Title or "Aikoware"
+    GuiConfig.Footer = GuiConfig.Footer or "| made by @aoki!"
     GuiConfig.Color = GuiConfig.Color or Color3.fromRGB(138, 43, 226)
     GuiConfig["Tab Width"] = GuiConfig["Tab Width"] or 120
     GuiConfig.Version = GuiConfig.Version or 1
@@ -846,7 +846,7 @@ function AIKO:Window(GuiConfig)
         Title.Position = UDim2.new(0, 0, 0, 4)
         Title.BackgroundTransparency = 1
         Title.Font = Enum.Font.GothamBold
-        Title.Text = "@aikoware"
+        Title.Text = "Aikoware"
         Title.TextSize = 22
         Title.TextColor3 = Color3.fromRGB(255, 255, 255)
         Title.ZIndex = 52
@@ -1344,7 +1344,6 @@ end
             FeatureImg.Position = UDim2.new(0.5, 0, 0.5, 0)
             FeatureImg.Rotation = -90
             FeatureImg.Size = UDim2.new(0, 16, 0, 16)
-            -- FeatureImg.Size = UDim2.new(1, 6, 1, 6)
             FeatureImg.Name = "FeatureImg"
             FeatureImg.Parent = FeatureFrame
 
