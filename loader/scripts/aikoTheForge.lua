@@ -1332,7 +1332,6 @@ AutoMoveSection:AddToggle({
         autoMovement.autoDodge = v
         if autoMovement.alwaysRun or autoMovement.autoDodge then
             spawn(autoMovementLoop)
-            end
         end
     end
 })
@@ -1351,6 +1350,8 @@ AutoParrySection:AddToggle({
 })
 
 local AutoSellSection = Tabs.AutoSell:AddSection("Auto Sell")
+
+oreOptions = buildOreOptions()
 
 local function RefreshInventoryList()
     local inv = getInventoryFromUI()
