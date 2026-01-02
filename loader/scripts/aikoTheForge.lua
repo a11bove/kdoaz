@@ -680,27 +680,27 @@ end
 local function TweenToTarget(TargetName, IsNPC)
     local Character = Players.LocalPlayer.Character
     if not Character then
-        aiko("Character not found!")
+        warn("Character not found!")
         return false
     end
     local RootPart = Character:FindFirstChild("HumanoidRootPart")
     if not RootPart then
-        aiko("HumanoidRootPart not found!")
+        warn("HumanoidRootPart not found!")
         return false
     end
     local Folder = IsNPC and workspace:FindFirstChild("Proximity") or workspace:FindFirstChild("Shops")
     if not Folder then
-        aiko("Folder not found!")
+        warn("Folder not found!")
         return false
     end
     local Target = Folder:FindFirstChild(TargetName)
     if not Target then
-        aiko("Target not found: " .. TargetName)
+        warn("Target not found: " .. TargetName)
         return false
     end
     local TargetRoot = Target:FindFirstChild("HumanoidRootPart") or Target.PrimaryPart or Target:FindFirstChildWhichIsA("BasePart", true)
     if not TargetRoot then
-        aiko("Target part not found!")
+        warn("Target part not found!")
         return false
     end
     local TargetPos = TargetRoot.Position + Vector3.new(0, 3, 0)
@@ -711,7 +711,6 @@ local function TweenToTarget(TargetName, IsNPC)
     })
     Tween:Play()
     Tween.Completed:Wait()
-    aiko("Teleported to " .. TargetName)
     return true
 end
 
@@ -819,8 +818,8 @@ end
 local AIKO = loadstring(game:HttpGet("https://raw.githubusercontent.com/a11bove/kdoaz/refs/heads/main/src/Library.lua"))()
 
 local Window = AIKO:Window({
-    Title = "@aikoware |",
-    Footer = "made by untog",
+    Title = "Aikoware |",
+    Footer = "made by @aoki!",
     Version = 1,
 })
 
@@ -844,7 +843,7 @@ InfoSection:AddParagraph({
 
 InfoSection:AddParagraph({
     Title = "Discord",
-    Content = "Join to our discord for more info!",
+    Content = "Join our discord for more information!",
     Icon = "discord",
     ButtonText = "Copy Server Link",
     ButtonCallback = function()
@@ -866,9 +865,6 @@ SettingsSection:AddToggle({
         antiAfk.enabled = v and true or false
         if v then 
             AA_Start()
-            aiko("Anti-AFK enabled!")
-        else
-            aiko("Anti-AFK disabled")
         end
     end
 })
@@ -974,11 +970,6 @@ OreFarmSection:AddToggle({
     Default = false,
     Callback = function(v)
         UseInstantTPMine = v
-        if v then
-            aiko("Instant TP for mining enabled!")
-        else
-            aiko("Instant TP for mining disabled")
-        end
     end
 })
 
@@ -988,11 +979,11 @@ OreFarmSection:AddToggle({
     Callback = function(v)
         AutoMineEnabled = v
         if v and (not RockTypes or #RockTypes == 0) then
-            aiko("Please select a rock type!")
+            warn("Please select a rock type!")
         elseif v then
-            aiko("Auto mine started!")
+            warn("Auto mine started!")
         else
-            aiko("Auto mine stopped")
+            warn("Auto mine stopped")
         end
     end
 })
@@ -1090,11 +1081,6 @@ MobFarmSection:AddToggle({
     Default = false,
     Callback = function(v)
         UseInstantTPEnemy = v
-        if v then
-            aiko("Instant TP for mob farming enabled!")
-        else
-            aiko("Instant TP for mob farming disabled")
-        end
     end
 })
 
@@ -1104,11 +1090,11 @@ MobFarmSection:AddToggle({
     Callback = function(v)
         AutoFarmEnemyEnabled = v
         if v and (not EnemyTypes or #EnemyTypes == 0) then
-            aiko("Please select an enemy type!")
+            warn("Please select an enemy type!")
         elseif v then
-            aiko("Auto farm mobs started!")
+            warn("Auto farm mobs started!")
         else
-            aiko("Auto farm mobs stopped")
+            warn("Auto farm mobs stopped")
         end
     end
 })
@@ -1264,10 +1250,10 @@ AutoPotSection:AddToggle({
     Callback = function(v)
         autoPotions.enabled = v
         if autoPotions.enabled then
-            aiko("Auto potions started!")
+            warn("Auto potions started!")
             spawn(autoPotionLoop)
         else
-            aiko("Auto potions stopped")
+            warn("Auto potions stopped")
         end
     end
 })
@@ -1331,9 +1317,9 @@ AutoMoveSection:AddToggle({
             spawn(autoMovementLoop)
         end
         if v then
-            aiko("Always run enabled!")
+            warn("Always run enabled!")
         else
-            aiko("Always run disabled")
+            warn("Always run disabled")
         end
     end
 })
@@ -1346,11 +1332,7 @@ AutoMoveSection:AddToggle({
         autoMovement.autoDodge = v
         if autoMovement.alwaysRun or autoMovement.autoDodge then
             spawn(autoMovementLoop)
-        end
-        if v then
-            aiko("Auto dodge enabled!")
-        else
-            aiko("Auto dodge disabled")
+            end
         end
     end
 })
@@ -1364,9 +1346,6 @@ AutoParrySection:AddToggle({
         autoParry.enabled = v
         if v then
             initializeAutoParry()
-            aiko("Auto parry enabled!")
-        else
-            aiko("Auto parry disabled")
         end
     end
 })
@@ -1390,7 +1369,7 @@ local function RefreshInventoryList()
     if InvDropdown then
         InvDropdown:SetValues(currentInvOptions, {})
     end
-    aiko("Refreshed inventory: " .. #options .. " items")
+    warn("Refreshed inventory: " .. #options .. " items")
 end
 
 local function performAutoSell()
@@ -1466,6 +1445,7 @@ AutoSellSection:AddButton({
     Title = "Refresh Inventory List",
     Callback = function()
         RefreshInventoryList()
+        aiko("Inventory Refreshed!")
     end
 })
 
@@ -1522,8 +1502,6 @@ AutoSellSection:AddToggle({
                     task.wait(autoSell.interval or 10)
                 end
             end)
-        else
-            aiko("Auto sell stopped")
         end
     end
 })
@@ -1535,7 +1513,6 @@ WebhookSection:AddInput({
     Placeholder = "https://discord.com/api/webhooks/...",
     Callback = function(v)
         webhook.url = v
-        aiko("Webhook URL updated!")
     end
 })
 
@@ -1544,9 +1521,6 @@ WebhookSection:AddInput({
     Placeholder = "123456789012345678",
     Callback = function(v)
         webhook.userId = v
-        if v ~= "" then
-            aiko("User ID set!")
-        end
     end
 })
 
@@ -1559,7 +1533,6 @@ WebhookSection:AddDropdown({
     Callback = function(opts)
         if type(opts) == "table" then
             webhook.selectedOres = opts
-            aiko("Webhook ores updated!")
         end
     end
 })
@@ -1568,7 +1541,6 @@ WebhookSection:AddButton({
     Title = "Test Webhook",
     Callback = function()
         if webhook.url == "" then
-            aiko("Please set webhook URL first!")
             return
         end
         sendWebhookNotification(
@@ -1598,9 +1570,6 @@ WebhookSection:AddToggle({
                 webhook.enabled = false
                 return
             end
-            aiko("Webhook notifications enabled!")
-        else
-            aiko("Webhook notifications disabled")
         end
     end
 })
@@ -1708,7 +1677,7 @@ TeleportWorldSection:AddButton({
 })
 
 AIKO:MakeNotify({
-    Title = "@aikoware",
+    Title = "Aikoware",
     Description = "Script Loaded",
     Content = "Game: The Forge",
     Delay = 4
