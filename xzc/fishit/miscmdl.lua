@@ -7,7 +7,6 @@ local LocalPlayer = Players.LocalPlayer
 local MiscModule = {}
 
 -- HIDE IDENTITY FUNCTIONS
-
 MiscModule.Identity = {
     NameLabel = nil,
     LevelLabel = nil,
@@ -128,24 +127,7 @@ function MiscModule.Identity:Toggle(enabled)
     end
 end
 
--- WALKSPEED FUNCTIONS
-
-MiscModule.Walkspeed = {}
-
-function MiscModule.Walkspeed:Set(value)
-    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    local humanoid = char:FindFirstChild("Humanoid")
-    if humanoid then
-        humanoid.WalkSpeed = value
-    end
-end
-
-function MiscModule.Walkspeed:Reset()
-    self:Set(18)
-end
-
 -- INFINITE JUMP
-
 MiscModule.InfiniteJump = {
     Enabled = false,
     Connection = nil
@@ -170,7 +152,6 @@ function MiscModule.InfiniteJump:Toggle(enabled)
 end
 
 -- PERFORMANCE FUNCTIONS
-
 MiscModule.Performance = {
     hidePlayersEnabled = false,
     playerAddedConnection = nil,
@@ -347,7 +328,6 @@ function MiscModule.FreezeCharacter:Toggle(enabled)
 end
 
 -- XP BAR
-
 MiscModule.XPBar = {}
 
 function MiscModule.XPBar:Toggle(state)
@@ -385,7 +365,6 @@ function MiscModule.AntiDrown:Toggle(state)
 end
 
 -- FISHING RADAR
-
 MiscModule.FishingRadar = {}
 
 function MiscModule.FishingRadar:Toggle(state)
@@ -438,7 +417,6 @@ function MiscModule.FishingRadar:Toggle(state)
 end
 
 -- INITIALIZATION
-
 function MiscModule:Initialize()
     self.Identity:Initialize()
     self.AntiDrown:Initialize()
