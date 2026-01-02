@@ -2346,7 +2346,13 @@ local WALKSPEED = uset:AddSlider({
     Max = 200,
     Default = 18,
     Callback = function(value)
-        MiscModule.Walkspeed:Set(value)
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = value
+            end
+        end
     end
 })
 
@@ -2354,7 +2360,13 @@ uset:AddButton({
     Title = "Reset Walkspeed",
     Content = "Returns to default speed.",
     Callback = function()
-        MiscModule.Walkspeed:Reset()
+        local character = LocalPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 18
+            end
+        end
     end
 })
 
