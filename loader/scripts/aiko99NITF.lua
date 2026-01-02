@@ -1959,7 +1959,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
 end)
 
 AIKO:MakeNotify({
-    Title = "@aikoware",
+    Title = "Aikoware",
     Description = "Script Loaded",
     Content = "Game: 99 Nights in The Forest",
     Delay = 5
