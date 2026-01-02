@@ -17,6 +17,7 @@ local Character = player.Character or player.CharacterAdded:Wait()
 local autoKM_Running = false
 local dupe_Running = false
 local duplicateCashActive = false
+local cashDupeAmount = 1200
 
 local function autoFarmKm(state)
     autoKM_Running = state
@@ -106,7 +107,7 @@ local function duplicateCash(state)
     if state then
         task.spawn(function()
             while duplicateCashActive do
-                for i = 1, 1200 do
+                for i = 1, cashDupeAmount do
                     pcall(function()
                         RecieveCash:FireServer({
                             Value = 100,
