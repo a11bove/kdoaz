@@ -219,7 +219,7 @@ function WebhookModule.SendFishWebhook(fishId, metadata, data)
                 url = "https://cdn.discordapp.com/attachments/1387681189502124042/1454161899238457571/New_Project.jpg?ex=6950154d&is=694ec3cd&hm=d3d22f3aa93d26b2f80b0b8a136d61269ece8c665a033947c71ae9fc1a7ddfa6&"
             },
             footer = {
-                text = "@aikoware Webhook"
+                text = "Aikoware Webhook"
             },
             timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
         }},
