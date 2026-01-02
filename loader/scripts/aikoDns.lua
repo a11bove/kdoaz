@@ -185,7 +185,7 @@ expsec:AddInput({
     Title = "Duplicate Cash Multiplier",
     Default = "1200",
     Placeholder = "Default: 1200",
-    Content = "100-6000",
+    Content = "1 - 6000",
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
