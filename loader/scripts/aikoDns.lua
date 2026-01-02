@@ -182,7 +182,7 @@ expsec:AddParagraph({
 })
 
 expsec:AddInput({
-    Title = "Cash Dupe Amount",
+    Title = "Duplicate Cash Multiplier",
     Default = "1200",
     Placeholder = "Default: 1200",
     Content = "100-6000",
