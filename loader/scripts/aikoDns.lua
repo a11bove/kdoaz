@@ -182,14 +182,6 @@ expsec:AddParagraph({
 })
 
 expsec:AddToggle({
-    Title = "Manual Duplicate Cash",
-    Default = false,
-    Callback = function(v)
-        duplicateCash(v)
-    end
-})
-
-expsec:AddToggle({
     Title = "Manual Duplicate Coins",
     Content = "",
     Default = false,
@@ -197,6 +189,16 @@ expsec:AddToggle({
         duplicateCoin(value)
     end
 })
+
+expsec:AddToggle({
+    Title = "Manual Duplicate Cash",
+    Default = false,
+    Callback = function(v)
+        duplicateCash(v)
+    end
+})
+
+expsec:AddDivider()
 
 expsec:AddToggle({
     Title = "Auto Farm KM",
