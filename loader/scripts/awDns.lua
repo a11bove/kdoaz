@@ -168,6 +168,37 @@ local function ResetBoostPower()
     BoostPower = 0
 end
 
+local settings = { 
+    repeatamount = 55, 
+    exceptions = {"SayMessageRequest"},
+    enabled = false
+}
+
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = function(uh, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+    
+    for _, v in pairs(settings.exceptions) do
+        if uh.Name == v then
+            return old(uh, ...)
+        end
+    end
+    
+    if settings.enabled and (method == "FireServer" or method == "InvokeServer") then
+        for i = 1, settings.repeatamount do
+            old(uh, unpack(args))
+        end
+    end
+    
+    return old(uh, unpack(args))
+end
+
+setreadonly(mt, true)
+
 local main = Window:AddTab({
     Name = "Main",
     Icon = "star"
@@ -199,6 +230,14 @@ expsec:AddToggle({
 })
 
 expsec:AddDivider()
+
+expsec:AddToggle({
+    Title = "Exp Farm",
+    Default = false,
+    Callback = function(value)
+        settings.enabled = value
+    end
+})
 
 expsec:AddToggle({
     Title = "Auto Farm KM",
